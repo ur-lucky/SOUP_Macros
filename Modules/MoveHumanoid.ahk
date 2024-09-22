@@ -1,6 +1,11 @@
 #Requires AutoHotkey v2.0
 #SingleInstance Force
 
+global Version := "1"
+global Dependencies := ["Utils\Functions.ahk"]
+
+#Include "%A_MyDocuments%\SOUP_Macros\Utils\Functions.ahk"
+
 SolveMovement(MovementMap) {
     KeyPresses := []  ; Array to store key presses and their timings
     CurrentTime := 0  ; Start from 0 time
