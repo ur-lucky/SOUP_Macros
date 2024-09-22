@@ -380,7 +380,10 @@ _init() {
 
     THIS_FILE := A_ScriptFullPath
     VersionCheckResults := VersionCheck(THIS_FILE, UpdatedScript)
+
+    
     if (VersionCheckResults.Changed) {
+        OutputDebug("[DEBUG] FILE UPDATED | CURRENT: " VersionCheckResults.Old " | NEW: " VersionCheckResults.New)
         FileDelete(THIS_FILE)
         FileAppend(UpdatedScript, THIS_FILE, "UTF-8-RAW")
         Run(THIS_FILE)
