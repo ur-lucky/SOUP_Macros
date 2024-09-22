@@ -392,54 +392,6 @@ _init() {
 
     GetDependency("")
 
-
-
-    THIS_FILE := A_ScriptFullPath
-    VersionCheckResults := VersionCheck(THIS_FILE, UpdatedScript)
-    if (VersionCheckResults.Changed) {
-        FileDelete(THIS_FILE)
-        FileAppend(UpdatedScript, THIS_FILE, "UTF-8-RAW")
-        Run(THIS_FILE)
-        ExitApp
-    }
-
-    RedrawQuickGui("Initializing")
-    CreateFolders(PATH_DIR, FOLDER_TREE)
-
-    GetDependency("")
-
-
-
-    THIS_FILE := A_ScriptFullPath
-    VersionCheckResults := VersionCheck(THIS_FILE, UpdatedScript)
-    if (VersionCheckResults.Changed) {
-        FileDelete(THIS_FILE)
-        FileAppend(UpdatedScript, THIS_FILE, "UTF-8-RAW")
-        Run(THIS_FILE)
-        ExitApp
-    }
-
-    RedrawQuickGui("Initializing")
-    CreateFolders(PATH_DIR, FOLDER_TREE)
-
-    GetDependency("")
-
-)
-
-    THIS_FILE := A_ScriptFullPath
-    VersionCheckResults := VersionCheck(THIS_FILE, UpdatedScript)
-    if (VersionCheckResults.Changed) {
-        FileDelete(THIS_FILE)
-        FileAppend(UpdatedScript, THIS_FILE, "UTF-8-RAW")
-        Run(THIS_FILE)
-        ExitApp
-    }
-
-    RedrawQuickGui("Initializing")
-    CreateFolders(PATH_DIR, FOLDER_TREE)
-
-    GetDependency("")
-
     QuickGui.Hide()
     HubGui.Show()
 }
