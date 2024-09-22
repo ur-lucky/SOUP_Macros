@@ -1,5 +1,7 @@
 ﻿#Requires AutoHotkey v2.0
-#SingleInstance Forceggglobal Version := "0"
+#SingleInstance Force
+
+global Version := "1"
 
 global PATH_DIR := A_MyDocuments
 global FOLDER_TREE := {
