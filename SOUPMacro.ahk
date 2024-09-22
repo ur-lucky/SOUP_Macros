@@ -1,6 +1,8 @@
 ﻿#Requires AutoHotkey v2.0
 #SingleInstance Force
 
+global Version := "1"
+
 global PATH_DIR := A_MyDocuments
 global FOLDER_TREE := {
     SOUP_Macros: {
@@ -366,11 +368,28 @@ Hub_MacroGroupBox := HubGui.AddGroupBox("x10 y85 w150 h200 +Center ", "Macro")
 
 
 _init() {
-    RedrawQuickGui("Loading")
+    RedrawQuickGui("Checking for updates")
+
+    UpdatedScript := GetDependency("SOUPMacro.ahk")
+
+    THIS_FILE := A_ScriptFullPath
+    VersionCheckResults := VersionCheck(THIS_FILE, UpdatedScript)
+    if (VersionCheckResults.Changed) {
+        FileDelete(THIS_FILE)
+        FileAppend(UpdatedScript, THIS_FILE, "UTF-8-RAW")
+        Run(THIS_FILE)
+        ExitApp
+    }
+
+    RedrawQuickGui("Initializing")
     CreateFolders(PATH_DIR, FOLDER_TREE)
     QuickGui.Hide()
     HubGui.Show()
 }
+
+_init()
+
+F8::ExitApp()
 
 ;VersionTest := GetDependency("Macros\VersionTest.ahk")
 ;ProcessDependencies("Macros\VersionTest.ahk")
