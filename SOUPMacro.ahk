@@ -160,6 +160,9 @@ StrJoin(array, seperator) {
 GetRawFromURL(url) {
     OutputDebug("[DEBUG] | MAKING A REQUEST")
     retries := 3  ; Number of retries
+
+    retryWaitTime := 10000
+
     RawResponse := ""
     
     Loop retries {
@@ -176,7 +179,7 @@ GetRawFromURL(url) {
             if (Download.Status != 200) {
                 OutputDebug("[DEBUG] | API LIMIT | " RawResponse)
                 MsgBox "API rate limit exceeded. Retrying..."
-                Sleep(10000)  ; Wait 10 seconds before retrying (can be longer)
+                Sleep(retryWaitTime * A_Index)  ; Wait 10 seconds before retrying (can be longer)
                 continue
             } else {
                 return RawResponse
