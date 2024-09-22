@@ -1,7 +1,7 @@
 ﻿#Requires AutoHotkey v2.0
 #SingleInstance Force
 
-global Version := "1"
+global Version := "0"
 
 global PATH_DIR := A_MyDocuments
 global FOLDER_TREE := {
@@ -169,16 +169,22 @@ GetRawFromURL(url) {
             Download.Send()
             Download.WaitForResponse()
 
+            OutputDebug("[DEBUG] | DOWNLOAD | " Download.Status " | " Download.StatusText " | ")
+            
             RawResponse := Download.ResponseText
-            OutputDebug("[DEBUG] | RAW RESPONSE | " RawResponse)
 
-            ; Check if the response contains rate limit exceeded message
-            if InStr(RawResponse, "API rate limit exceeded") {
+            if (Download.Status != 200) {
+                OutputDebug("[DEBUG] | API LIMIT | " RawResponse)
                 MsgBox "API rate limit exceeded. Retrying..."
                 Sleep(10000)  ; Wait 10 seconds before retrying (can be longer)
+                continue
             } else {
-                return RawResponse  ; Return the valid response
+                return RawResponse
             }
+
+            ;OutputDebug("[DEBUG] | RAW RESPONSE | " RawResponse)
+
+            ; Check if the response contains rate limit exceeded message
         } catch Error as err {
             MsgBox("Error while downloading: " err.Message, "Error", "0x30")
         }
@@ -383,6 +389,9 @@ _init() {
 
     RedrawQuickGui("Initializing")
     CreateFolders(PATH_DIR, FOLDER_TREE)
+
+    GetDependency("")
+
     QuickGui.Hide()
     HubGui.Show()
 }
