@@ -379,7 +379,7 @@ _init() {
     UpdatedScript := GetDependency("SOUPMacro.ahk")
 
     THIS_FILE := A_ScriptFullPath
-    VersionCheckResults := VersionCheck(THIS_FILE, UpdatedScript)
+    VersionCheckResults := VersionCheck(FileRead(THIS_FILE), UpdatedScript)
 
     
     if (VersionCheckResults.Changed) {
