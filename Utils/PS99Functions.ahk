@@ -1,5 +1,12 @@
 ﻿#Requires AutoHotkey v2.0
 
+global Version := "1"
+global Dependencies := ["Utils\Functions.ahk", "Utils\UWBOCRLib.ahk", "Storage\PS99UI.ahk"]
+
+#Include "%A_MyDocuments%\SOUP_Macros\Utils\Functions.ahk"
+#Include "%A_MyDocuments%\SOUP_Macros\Utils\UWBOCRLib.ahk"
+#Include "%A_MyDocuments%\SOUP_Macros\Storage\PS99UI.ahk"
+
 CoordMode "Pixel", "Client"
 CoordMode "Mouse", "Client"
 SetMouseDelay -1
