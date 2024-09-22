@@ -1,7 +1,5 @@
 ﻿#Requires AutoHotkey v2.0
-#SingleInstance Force
-
-global Version := "0"
+#SingleInstance Forceggglobal Version := "0"
 
 global PATH_DIR := A_MyDocuments
 global FOLDER_TREE := {
@@ -377,6 +375,54 @@ _init() {
     RedrawQuickGui("Checking for updates")
 
     UpdatedScript := GetDependency("SOUPMacro.ahk")
+
+    THIS_FILE := A_ScriptFullPath
+    VersionCheckResults := VersionCheck(THIS_FILE, UpdatedScript)
+    if (VersionCheckResults.Changed) {
+        FileDelete(THIS_FILE)
+        FileAppend(UpdatedScript, THIS_FILE, "UTF-8-RAW")
+        Run(THIS_FILE)
+        ExitApp
+    }
+
+    RedrawQuickGui("Initializing")
+    CreateFolders(PATH_DIR, FOLDER_TREE)
+
+    GetDependency("")
+
+
+
+    THIS_FILE := A_ScriptFullPath
+    VersionCheckResults := VersionCheck(THIS_FILE, UpdatedScript)
+    if (VersionCheckResults.Changed) {
+        FileDelete(THIS_FILE)
+        FileAppend(UpdatedScript, THIS_FILE, "UTF-8-RAW")
+        Run(THIS_FILE)
+        ExitApp
+    }
+
+    RedrawQuickGui("Initializing")
+    CreateFolders(PATH_DIR, FOLDER_TREE)
+
+    GetDependency("")
+
+
+
+    THIS_FILE := A_ScriptFullPath
+    VersionCheckResults := VersionCheck(THIS_FILE, UpdatedScript)
+    if (VersionCheckResults.Changed) {
+        FileDelete(THIS_FILE)
+        FileAppend(UpdatedScript, THIS_FILE, "UTF-8-RAW")
+        Run(THIS_FILE)
+        ExitApp
+    }
+
+    RedrawQuickGui("Initializing")
+    CreateFolders(PATH_DIR, FOLDER_TREE)
+
+    GetDependency("")
+
+)
 
     THIS_FILE := A_ScriptFullPath
     VersionCheckResults := VersionCheck(THIS_FILE, UpdatedScript)
