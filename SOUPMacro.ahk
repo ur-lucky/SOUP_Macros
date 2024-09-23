@@ -6,7 +6,7 @@ minor_version := 0
 patch_version := 0
 label := "alpha"
 
-MacroButtonAmount := 8
+global MacroButtonAmount := 8
 
 global PATH_DIR := A_MyDocuments
 global FOLDER_TREE := {
@@ -18,7 +18,7 @@ global FOLDER_TREE := {
 }
 
 global Version := "1"
-;global Menu_Version := major_version "." minor_version "." patch_version (label != "" ? "-" label : "")
+global Menu_Version := major_version "." minor_version "." patch_version (label != "" ? "-" label : "")
 
 global GITHUB_API_URL := "https://api.github.com/repos/ur-lucky/SOUP_Macros/contents/"
 global GITHUB_RAW_URL := "https://raw.githubusercontent.com/ur-lucky/SOUP_Macros/main/"
@@ -32,6 +32,12 @@ global MainGui_MacroInfoArray := []
 global MacroArray := []
 global ProcessedDependencies := []
 
+global ColorMap := Map()
+ColorMap["Unknown"] := "0x858585"
+ColorMap["Stable"] := "0x2bff0f"
+ColorMap["Unstable"] := "0xffb10a"
+ColorMap["Unsupported"] := "0x9b6fee"
+ColorMap["Non-functional"] := "0xff1a1a"
 
 QuickGui := Gui(Options := "+AlwaysOnTop -Caption -SysMenu", Title := "Preload")
 QuickGui.SetFont("s15 w450 q2")
@@ -48,6 +54,37 @@ RedrawQuickGui(NewText := "text", Duration := 0) {
 }
 
 ; Core functions
+
+TimeToString(IsoTime) {
+    Reformatted := ""
+
+    Split1 := StrSplit(IsoTime, "T")
+    Split2 := StrSplit(Split1[1], "-")
+    Reformatted := Split2[1] Split2[2] Split2[3]
+
+    Split3 := StrSplit(Split1[2], "Z")
+    Split4 := StrSplit(Split3[1], ":")
+    Reformatted := Reformatted Split4[1] Split4[2] Split4[3]
+
+    ; Calculate the time difference in different units
+    DaysDiff := DateDiff(A_NowUTC, Reformatted, "Days")
+    HoursDiff := DateDiff(A_NowUTC, Reformatted, "Hours")
+    MinutesDiff := DateDiff(A_NowUTC, Reformatted, "Minutes")
+
+    ; Determine the most relevant time unit
+    if (DaysDiff > 0) {
+        return {Time: DaysDiff, Word: DaysDiff = 1 ? "Day" : "Days"}
+    } else if (HoursDiff > 0) {
+        return {Time: HoursDiff, Word: HoursDiff = 1 ? "Hour" : "Hours"}
+    } else if (MinutesDiff > 0) {
+        return {Time: MinutesDiff, Word: MinutesDiff = 1 ? "Minute" : "Minutes"}
+    } else {
+        return {Time: "A Couple", Word: "Seconds"}
+    }
+}
+
+
+
 
 StrJoin(array, seperator) {
     filePath := ""
@@ -67,6 +104,13 @@ ExtractVersion(Text) {
         return match[1]
     }
     return "?"
+}
+
+ExtractText(str, find) {
+    if RegExMatch(str, find '\s*:=\s*"(.*?)"', &match) {
+        return match[1]
+    }
+    return ""
 }
 
 VersionCheck(old, new) {
@@ -387,6 +431,7 @@ CreateFolders(BasePath, FolderTree) {
 UpdateMacroPage() {
     global CurrentPage
     global MacroArray
+    global MacroButtonAmount
 
     TotalMacros := MacroArray.Length
     MaxPages := Ceil(TotalMacros / MacroButtonAmount)
@@ -403,12 +448,13 @@ UpdateMacroPage() {
             button.Visible := false
         }
     }
-    MainGui_MacroPageNumber.Text := CurrentPage . "/" . MaxPages
+    MainGui_MacroPageNumber.Text := CurrentPage . "/" . (MaxPages = 0 ? 1 : MaxPages)
 }
 
 ChangeMacroPage(Index := "Next") {
     global CurrentPage
     global MacroArray
+    global MacroButtonAmount
 
     TotalMacros := MacroArray.Length
     MaxPages := Ceil(TotalMacros / MacroButtonAmount)
@@ -437,30 +483,100 @@ ChangeMacroPage(Index := "Next") {
     }
 }
 
-MacroButtonClicked(buttonNumber) {
+MacroButtonClicked(ButtonNumber) {
     global CurrentPage
     global PageWhenButtonClicked
     global MacroButtonSelected
 
-    if (CurrentPage = PageWhenButtonClicked) and (MacroButtonSelected = buttonNumber) {
+    OutputDebug("[DEBUG] MacroButtonSelected: " MacroButtonSelected " | New button: " ButtonNumber)
+
+    if (CurrentPage = PageWhenButtonClicked) and (MacroButtonSelected = ButtonNumber) {
         return ; user clicked on the same button
     }
 
     PageWhenButtonClicked := CurrentPage
-    MacroButtonSelected := buttonNumber
+    MacroButtonSelected := ButtonNumber
 
-    MacroIndex := (CurrentPage * MacroButtonAmount) - MacroButtonAmount + buttonNumber
-
+    MacroIndex := (CurrentPage * MacroButtonAmount) - MacroButtonAmount + ButtonNumber
     macroObj := MacroArray.Get(MacroIndex)
 
     MainGui_MacroInfo_MacroName.Text := macroObj.name
     MainGui_MacroInfo_MacroVersion.Text := macroObj.version
     MainGui_MacroInfo_MacroDescription.Text := macroObj.description
-    MainGui_MacroInfo_MacroStatusLabel.Text := macroObj.status
+    MainGui_MacroInfo_MacroStatus.Text := macroObj.status
 
- 
+    if ColorMap.Has(macroObj.status) {
+        MainGui_MacroInfo_MacroStatus.SetFont("s11 Bold q4 c" ColorMap[macroObj.status], "Cascadia Code")
+    }
+
+    MainGui_MacroInfo_MacroLastUpdate.Text := macroObj.LastUpdated
+
+    for _, uiElement in MainGui_MacroInfoArray {
+        uiElement.Visible := true
+    }
+
+    if RegExMatch(macroObj.LastUpdated, "Fetch|Failed") > 0 {
+        MainGui_MacroInfo_MacroLastUpdate.Text := "[Fetching...]"
+        GetExtraMacroInformation(macroObj)  ; Fetch the data if not already fetched
+        if (CurrentPage = PageWhenButtonClicked) and (MacroButtonSelected = ButtonNumber) {
+            MainGui_MacroInfo_MacroLastUpdate.Text := macroObj.LastUpdated
+        }
+    }
 }
 
+GetExtraMacroInformation(MacroObj) {
+    ; Create a placeholder for storing commit history and last update information
+    MacroObj.CommitHistory := []
+    MacroObj.LastUpdated := "[Fetching...]"
+
+    ; Fetch the last update time and commit history from the GitHub API
+    try {
+        APILink := "https://api.github.com/repos/ur-lucky/SOUP_Macros/commits?path=Macros/" MacroObj.name ".ahk&page=1&per_page=25"
+        APIDownload := ComObject("WinHttp.WinHttpRequest.5.1")
+        APIDownload.Open("GET", APILink, true)
+        APIDownload.Send()
+        APIDownload.WaitForResponse()
+
+        ; Parse the JSON response
+        ReturnedJsonText := APIDownload.ResponseText
+        CommitHistory := Jxon_Load(&ReturnedJsonText)
+
+        ; Extract the time of the latest commit
+        TimeRecollection := TimeToString(CommitHistory[1]["commit"]["author"]["date"])
+        MacroObj.LastUpdated := TimeRecollection.Time " " TimeRecollection.Word " Ago"
+
+        ; Store the full commit history (limited to the first 25 commits)
+        for index, commit in CommitHistory {
+            MacroObj.CommitHistory.Push({Time: TimeToString(commit["commit"]["author"]["date"]), Message: commit["commit"]["message"]})
+        }
+
+    } catch as E {
+        OutputDebug("[DEBUG] Macro information error | " E.Message)
+        MacroObj.LastUpdated := "[Failed to Fetch]"
+    }
+}
+
+AddToMacroArray(name, rawfile) {
+    fileDescription := ExtractText(rawfile, "Description")
+    fileVersion := ExtractText(rawfile, "Version")
+    fileStatus := ExtractText(rawfile, "Status")
+    
+    MacroObj := {
+        file: rawfile, 
+        name: name, 
+        description: fileDescription = "" ? "" : fileDescription, 
+        version: fileVersion != "" ? "v" fileVersion : "1.0.0", 
+        status: fileStatus = "" ? "Unknown" : fileStatus,
+        CommitHistory: [],  ; Placeholder for commit history
+        LastUpdated: "[Fetching...]"  ; Placeholder for last updated time
+    }
+
+    MacroArray.Push(MacroObj)
+}
+
+stupid_reroute_function(button, index) {
+    button.OnEvent("Click", (*) => MacroButtonClicked(index))
+}
 
 MainGui := Gui(Options := "+AlwaysOnTop", Title := "SOUP Macro | Version: " Menu_Version)
 MainGui.BackColor := "ffffff"
@@ -522,7 +638,6 @@ MainGui_MacroInfo_MacroLastUpdate := MainGui.AddText("x195 y300 w190 h20 +Center
 MainGui_MacroInfo_MacroLastUpdate.SetFont("s11 Bold q4", "Cascadia Code")
 MainGui_MacroInfoArray.Push(MainGui_MacroInfo_MacroLastUpdate)
 
-
 cachedMacros := []
 
 
@@ -551,6 +666,18 @@ _InitiateHub() {
         }
     }
 
+    MacrosFromGithub := GetFilesFromGithub(["Macros"], true)
+    OutputDebug("[DEBUG] GOT GITHUB FILES")
+
+    for filePath, rawText in MacrosFromGithub {
+        ;OutputDebug("[DEBUG] GOT MACRO STUFF: " name " | " som)
+        nameSplit := StrSplit(filePath, "/")
+        fileNameExt := nameSplit[nameSplit.Length]
+        fileName := StrSplit(fileNameExt, ".")[1]
+
+        AddToMacroArray(fileName, rawText)
+    }
+
     for _, macroObject in cachedMacros {
         ;MacroArray.Push(macroObject)
     }
@@ -559,7 +686,7 @@ _InitiateHub() {
         if (A_Index = 1) {
             ;continue
         }
-        newButton := MainGui.AddButton("x15 y" 85 + (A_Index * 30) - 30 " w160 h25", "")
+        newButton := MainGui.AddButton("x15 y" 85 + (A_Index * 30) - 30 " w160 h26", "")
         newButton.SetFont("s11", "Cascadia Code")
     
         if (cachedMacros.Has(A_Index)) {
@@ -571,8 +698,7 @@ _InitiateHub() {
             newButton.Text := "none"
         }
     
-        newButton.OnEvent("Click", (*) => MacroButtonClicked(A_Index))
-    
+        stupid_reroute_function(newButton, A_Index)
         MainGui_MacroButtonArray.Push(newButton)
     }
 

@@ -2,8 +2,8 @@
 #SingleInstance Force
 
 global MacroName := "Pet Cube"
-global MacroDescription := "Automatically break boss chest & capture pets"
-global MacroStatus := "Unknown"
+global MacroDescription := "Automatically break boss chest and capture pets"
+global MacroStatus := "Unstable"
 
 global Version := "1"
 global Dependencies := [
