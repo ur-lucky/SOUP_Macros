@@ -1,10 +1,12 @@
 ﻿#Requires AutoHotkey v2.0
 #SingleInstance Force
 
+/*
 major_version := 0
 minor_version := 0
 patch_version := 0
 label := "alpha"
+*/
 
 global MacroButtonAmount := 8
 
@@ -17,8 +19,8 @@ global FOLDER_TREE := {
     }
 }
 
-global Version := "1"
-global Menu_Version := major_version "." minor_version "." patch_version (label != "" ? "-" label : "")
+global Version := "1.0.0"
+;global Menu_Version := major_version "." minor_version "." patch_version (label != "" ? "-" label : "")
 
 global GITHUB_API_URL := "https://api.github.com/repos/ur-lucky/SOUP_Macros/contents/"
 global GITHUB_RAW_URL := "https://raw.githubusercontent.com/ur-lucky/SOUP_Macros/main/"
@@ -501,7 +503,7 @@ MacroButtonClicked(ButtonNumber) {
     macroObj := MacroArray.Get(MacroIndex)
 
     MainGui_MacroInfo_MacroName.Text := macroObj.name
-    MainGui_MacroInfo_MacroVersion.Text := macroObj.version
+    MainGui_MacroInfo_MacroVersion.Text := "v" macroObj.version
     MainGui_MacroInfo_MacroDescription.Text := macroObj.description
     MainGui_MacroInfo_MacroStatus.Text := macroObj.status
 
@@ -510,6 +512,14 @@ MacroButtonClicked(ButtonNumber) {
     }
 
     MainGui_MacroInfo_MacroLastUpdate.Text := macroObj.LastUpdated
+
+    if macroObj.InitialFetch {
+        MainGui_MacroInfo_RunMacro.Enabled := true
+        ;MainGui_MacroInfo_RunMacro.Text := "Run"
+    } else {
+        MainGui_MacroInfo_RunMacro.Enabled := false
+        ;MainGui_MacroInfo_RunMacro.Text := "[Fetching...]"
+    }
 
     for _, uiElement in MainGui_MacroInfoArray {
         uiElement.Visible := true
@@ -521,6 +531,8 @@ MacroButtonClicked(ButtonNumber) {
         if (CurrentPage = PageWhenButtonClicked) and (MacroButtonSelected = ButtonNumber) {
             MainGui_MacroInfo_MacroLastUpdate.Text := macroObj.LastUpdated
         }
+        MainGui_MacroInfo_RunMacro.Enabled := true
+        ;MainGui_MacroInfo_RunMacro.Text := "Run"
     }
 }
 
@@ -554,6 +566,7 @@ GetExtraMacroInformation(MacroObj) {
         OutputDebug("[DEBUG] Macro information error | " E.Message)
         MacroObj.LastUpdated := "[Failed to Fetch]"
     }
+    MacroObj.InitialFetch := true
 }
 
 AddToMacroArray(name, rawfile) {
@@ -565,20 +578,24 @@ AddToMacroArray(name, rawfile) {
         file: rawfile, 
         name: name, 
         description: fileDescription = "" ? "" : fileDescription, 
-        version: fileVersion != "" ? "v" fileVersion : "1.0.0", 
+        version: fileVersion != "" ? fileVersion : "1.0.0", 
         status: fileStatus = "" ? "Unknown" : fileStatus,
         CommitHistory: [],  ; Placeholder for commit history
-        LastUpdated: "[Fetching...]"  ; Placeholder for last updated time
+        LastUpdated: "[Fetching...]",  ; Placeholder for last updated time
+        InitialFetch: false
     }
 
-    MacroArray.Push(MacroObj)
+
+    if MacroObj.status != "Hidden" {
+        MacroArray.Push(MacroObj)
+    }
 }
 
 stupid_reroute_function(button, index) {
     button.OnEvent("Click", (*) => MacroButtonClicked(index))
 }
 
-MainGui := Gui(Options := "+AlwaysOnTop", Title := "SOUP Macro | Version: " Menu_Version)
+MainGui := Gui(Options := "+AlwaysOnTop", Title := "SOUP Macro | Version: " Version)
 MainGui.BackColor := "ffffff"
 
 MainGui_Title := MainGui.AddText("w400 h35 x0 y8 +Center", "SOUP Clan")
@@ -637,6 +654,10 @@ MainGui_MacroInfoArray.Push(MainGui_MacroInfo_MacroLastUpdateLabel)
 MainGui_MacroInfo_MacroLastUpdate := MainGui.AddText("x195 y300 w190 h20 +Center", "[x days ago]")
 MainGui_MacroInfo_MacroLastUpdate.SetFont("s11 Bold q4", "Cascadia Code")
 MainGui_MacroInfoArray.Push(MainGui_MacroInfo_MacroLastUpdate)
+
+MainGui_MacroInfo_RunMacro := MainGui.AddButton("x195 y330 w190 h25 +Center", "Run Macro")
+MainGui_MacroInfo_RunMacro.SetFont("s12 Bold q4", "Cascadia Code")
+MainGui_MacroInfoArray.Push(MainGui_MacroInfo_RunMacro)
 
 cachedMacros := []
 
