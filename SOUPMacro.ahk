@@ -26,7 +26,7 @@ QuickGuiText := QuickGui.AddText("Center w450")
 
 RedrawQuickGui(NewText := "text", Duration := 0) {
     QuickGuiText.Text := NewText
-    QuickGuiText.Redraw()
+    ;QuickGuiText.Redraw()
     QuickGui.Show()
 
     if (Duration != 0) {
@@ -159,7 +159,7 @@ StrJoin(array, seperator) {
 
 GetRawFromURL(url) {
     OutputDebug("[DEBUG] | MAKING A REQUEST")
-    retries := 3  ; Number of retries
+    retries := 6  ; Number of retries
 
     retryWaitTime := 10000
 
@@ -182,11 +182,17 @@ GetRawFromURL(url) {
                 timeElapsed := 0
                 startTick := A_TickCount
 
+                
+                QuickGui.Show()
+
                 while timeElapsed <= retryWaitTime {
                     timeElapsed := A_TickCount - startTick
                     QuickGuiText.Text := "Retrying in... " . Round((retryWaitTime - timeElapsed) / 1000)
                     Sleep(90)
                 }
+
+                QuickGuiText.Text := "Retrying..."
+                Sleep(1000)
 
                 continue
             } else {
@@ -385,7 +391,8 @@ Hub_MacroGroupBox := HubGui.AddGroupBox("x10 y85 w150 h200 +Center ", "Macro")
 
 
 _init() {
-    QuickGuiText.Text = "Checking for updates"
+    ;QuickGuiText.Text := "Checking for updates"
+    RedrawQuickGui("Checking for updates")
 
     UpdatedScript := GetDependency("SOUPMacro.ahk")
 
@@ -401,7 +408,8 @@ _init() {
         ExitApp
     }
 
-    QuickGuiText.Text = "Initializing"
+    ;QuickGuiText.Text := "Initializing"
+    RedrawQuickGui("Initializing")
     CreateFolders(PATH_DIR, FOLDER_TREE)
 
     GetDependency("")
