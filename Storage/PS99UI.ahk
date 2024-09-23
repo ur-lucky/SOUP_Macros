@@ -1,5 +1,8 @@
 ﻿#Requires AutoHotkey v2.0
 
+global Version := "1"
+global Dependencies := []
+
 global PS99_UI_POSITION_MAP := Map()
 global PS99_UI_COLOR_MAP := Map()
 

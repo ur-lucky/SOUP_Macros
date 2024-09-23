@@ -1,5 +1,8 @@
 #Requires AutoHotkey v2
 
+global Version := "1"
+global Dependencies := []
+
 /**
  * OCR library: a wrapper for the the UWP Windows.Media.Ocr library.
  * Based on the UWP OCR function for AHK v1 by malcev.

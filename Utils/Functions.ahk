@@ -1,6 +1,9 @@
 ﻿#Requires AutoHotkey v2.0
 #SingleInstance Force
 
+global Version := "1"
+global Dependencies := []
+
 CoordMode "Pixel", "Client"
 CoordMode "Mouse", "Client"
 SetMouseDelay -1
