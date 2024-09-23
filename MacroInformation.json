@@ -13,9 +13,9 @@
         },
         "Pet Cube Lite.ahk": {
             "name": "Pet Cube Lite",
-            "description": "F3 Start F6 Pause F8 Exit\nDoesn't automatically move you",
+            "description": "Doesn't automatically move you to the required position",
             "status": "Stable",
-            "version": "1.0.3"
+            "version": "1.0.0"
         }
     }
 }
