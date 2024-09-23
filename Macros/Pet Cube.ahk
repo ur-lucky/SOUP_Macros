@@ -190,7 +190,7 @@ _RunAutoCatchMacro() {
         currentTick := A_TickCount
 
         ; initialization
-        ;SetupCharacter()
+        SetupCharacter()
         CurrentSessionStartTick := A_TickCount
         LastCatchPrompt := A_TickCount
 

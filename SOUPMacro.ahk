@@ -40,8 +40,6 @@ global MacroObjects := Map()
 global LocalMacros := Map()
 
 
-
-
 global ColorMap := Map()
 ColorMap["Unknown"] := "0x858585"
 ColorMap["Stable"] := "0x2bff0f"
@@ -50,7 +48,7 @@ ColorMap["Unsupported"] := "0x9b6fee"
 ColorMap["Non-functional"] := "0xff1a1a"
 
 QuickGui := Gui(Options := "+AlwaysOnTop -Caption -SysMenu", Title := "Preload")
-QuickGui.SetFont("s15 w450 q2")
+QuickGui.SetFont("s15 w450 q2", "Cascadia Code")
 QuickGuiText := QuickGui.AddText("Center w450")
 
 RedrawQuickGui(NewText := "text", Duration := 0) {
@@ -522,9 +520,9 @@ MacroButtonClicked(ButtonNumber) {
         MainGui_MacroInfo_MacroStatus.SetFont("s11 Bold q4 c" ColorMap[macroObj.status], "Cascadia Code")
     }
 
-    MainGui_MacroInfo_MacroLastUpdate.Text := macroObj.LastUpdated
+    MainGui_MacroInfo_MacroLastUpdate.Text := macroObj.last_updated
 
-    if macroObj.InitialFetch {
+    if macroObj.initial_fetch_complete {
         MainGui_MacroInfo_RunMacro.Enabled := true
         ;MainGui_MacroInfo_RunMacro.Text := "Run"
     } else {
@@ -537,11 +535,11 @@ MacroButtonClicked(ButtonNumber) {
     }
 
     ;if RegExMatch(macroObj.LastUpdated, "Fetch|Failed") > 0 {
-    if not macroObj.InitialFetch {
+    if not macroObj.initial_fetch_complete {
         MainGui_MacroInfo_MacroLastUpdate.Text := "[Fetching...]"
         GetExtraMacroInformation(macroObj)  ; Fetch the data if not already fetched
         if (CurrentPage = PageWhenButtonClicked) and (MacroButtonSelected = ButtonNumber) {
-            MainGui_MacroInfo_MacroLastUpdate.Text := macroObj.LastUpdated
+            MainGui_MacroInfo_MacroLastUpdate.Text := macroObj.last_updated
             MainGui_MacroInfo_RunMacro.Enabled := true
         }
         ;MainGui_MacroInfo_RunMacro.Text := "Run"
@@ -555,21 +553,52 @@ RunButtonClicked() {
     MacroIndex := (PageWhenButtonClicked * MacroButtonAmount) - MacroButtonAmount + MacroButtonSelected
     macroObj := MacroArray.Get(MacroIndex)
 
+    if not macroObj.HasOwnProp("local_path") {
+        switch MsgBox(
+            "Macro `"" macroObj.name "`" is missing.`nWould you like to install it?", 
+            "SOUP Macros", 
+            "0x1032 0x4"
+        ) {
+            case "Yes":
+                newFile := GetDependency(macroObj.path)
+                macroObj.raw_file := newFile
+                FileAppend(newFile, macroObj.local_path, "UTF-8-RAW")
+                MsgBox("Installed missing dependency.")
+        }
+    } else if macroObj.HasOwnProp("local_version") {
+        if macroObj.version != macroObj.local_version {
+            switch MsgBox(
+                "Macro `"" macroObj.name "`" was updated `nWould you like to update?",
+                "SOUP Macros", 
+                "0x1032 0x4"
+            ) {
+                case "Yes":
+                    FileDelete(macroObj.local_path)
+                    newFile := GetDependency(macroObj.path)
+                    macroObj.raw_file := newFile
+                    FileAppend(newFile, macroObj.local_path, "UTF-8-RAW")
+                    MsgBox("Updated macro and saved locally.")
+                default:
+                    MsgBox("Keeping the current version.")
+            }
+        }
+    }
+
     FilePath := PATH_DIR . "\SOUP_Macros\Macros\"
 
     RedrawQuickGui("Ensuring dependencies are loaded")
-    ProcessDependencies(macroObj.file)
+    ProcessDependencies(macroObj.raw_file)
     QuickGui.Hide()
 
-    Run(macroObj.file)
+    Run(macroObj.local_path)
 
     ExitApp()
 }
 
 GetExtraMacroInformation(MacroObj) {
     ; Create a placeholder for storing commit history and last update information
-    MacroObj.CommitHistory := []
-    MacroObj.LastUpdated := "[Fetching...]"
+    MacroObj.commit_history := []
+    MacroObj.last_updated := "[Fetching...]"
 
     ; Fetch the last update time and commit history from the GitHub API
     try {
@@ -585,18 +614,18 @@ GetExtraMacroInformation(MacroObj) {
 
         ; Extract the time of the latest commit
         TimeRecollection := TimeToString(CommitHistory[1]["commit"]["author"]["date"])
-        MacroObj.LastUpdated := TimeRecollection.Time " " TimeRecollection.Word " Ago"
+        MacroObj.last_updated := TimeRecollection.Time " " TimeRecollection.Word " Ago"
 
         ; Store the full commit history (limited to the first 25 commits)
         for index, commit in CommitHistory {
-            MacroObj.CommitHistory.Push({Time: TimeToString(commit["commit"]["author"]["date"]), Message: commit["commit"]["message"]})
+            MacroObj.commit_history.Push({Time: TimeToString(commit["commit"]["author"]["date"]), Message: commit["commit"]["message"]})
         }
 
     } catch as E {
         OutputDebug("[DEBUG] Macro information error | " E.Message)
-        MacroObj.LastUpdated := "[Failed to Fetch]"
+        MacroObj.last_updated := "[Failed to Fetch]"
     }
-    MacroObj.InitialFetch := true
+    MacroObj.initial_fetch_complete := true
 }
 
 AddToMacroArray(name, rawfile) {
@@ -773,29 +802,31 @@ CreateMacroObject(argMap) {
     global MacroArray
 
     newObj := {
-        name: argMap.Has("name") ? argMap["name"] : "UNKNOWN",
-        description: argMap.Has("description") ? argMap["description"] : "",
-        version: argMap.Has("version") ? argMap["version"] : "1.0.0",
-        status: argMap.Has("status") ? argMap["status"] : "Unknown",
+        name: argMap.HasOwnProp("name") ? argMap.name : "UNKNOWN",
+        description: argMap.HasOwnProp("description") ? argMap.description : "",
+        version: argMap.HasOwnProp("version") ? argMap.version : "1.0.0",
+        status: argMap.HasOwnProp("status") ? argMap.status : "Unknown",
 
-        file_name: argMap.Has("filename") ? argMap["filename"] : "",
-        path:argMap.Has("path") ? argMap["path"] : "",
+        file_name: argMap.HasOwnProp("filename") ? argMap.filename : "",
+        path:argMap.HasOwnProp("path") ? argMap.path : "",
 
         commit_history: [],
+        last_updated: "?",
         initial_fetch_complete: false
     }
 
-    if argMap.Has("download_url") {
-        newObj["download_url"] := argMap["download_url"]
+    if argMap.HasOwnProp("download_url") {
+        newObj.download_url := argMap.download_url
     }
 
-    if argMap.Has("local_path") {
-        newObj["local_path"] := argMap["local_path"]
-        newObj["raw_file"] := argMap["raw_file"]
+    if argMap.HasOwnProp("local_path") {
+        newObj.local_path := argMap.local_path
+        newObj.local_version := argMap.local_version
+        newObj.raw_file := argMap.raw_file
     }
 
-    if argMap.Has("is_custom") {
-        newObj["is_custom"] := argMap["is_custom"]
+    if argMap.HasOwnProp("is_custom") {
+        newObj.is_custom := argMap.is_custom
     }
 
     MacroArray.Push(newObj)
@@ -840,32 +871,34 @@ GetMacroInformation() {
     Request_JSON := Jxon_Load(&response)
 
     for key, config in Request_JSON {
-        if GithubMacros.HasOwnProp(key) {
+        if GithubMacros.Has(key) {
             GitubMacroInfo := GithubMacros[key]
 
-            newArgMap := Map()
+            newArgMap := {}
             
-            newArgMap["description"] := config.Has("description") ? config["description"] : ""
-            newArgMap["status"] := config.Has("status") ? config["status"] : "Unknown"
+            newArgMap.description := config.Has("description") ? config["description"] : ""
+            newArgMap.status := config.Has("status") ? config["status"] : "Unknown"
+            newArgMap.version := config.Has("version") ? config["version"] : "1.0.0"
             
             if LocalMacros.Has(key) {
                 LocalMacro := LocalMacros[key]
-                newArgMap["name"] := LocalMacro["name"]
-                newArgMap["version"] := LocalMacro["version"]
-                newArgMap["filename"] := LocalMacro["filename"]
-                newArgMap["local_path"] := LocalMacro["path"]
-                newArgMap["raw_file"] := LocalMacro["raw_file"]
+                newArgMap.name := LocalMacro.name
+                newArgMap.local_version := LocalMacro.version
+                newArgMap.filename := LocalMacro.filename
+                newArgMap.local_path := LocalMacro.path
+                newArgMap.raw_file := LocalMacro.raw_file
             } else {
-                newArgMap["name"] := config.Has("name") ? config["name"] : key
-                newArgMap["version"] := config.Has("version") ? config["version"] : "1.0.0"
-                newArgMap["filename"] := GitubMacroInfo["name"]
+                newArgMap.name := config.Has("name") ? config["name"] : key
+                newArgMap.filename := GitubMacroInfo.name
             }
             
-            newArgMap["path"] := GitubMacroInfo["path"]
-            newArgMap["download_url"] := GitubMacroInfo["download_url"]
+            newArgMap.path := GitubMacroInfo.path
+            newArgMap.download_url := GitubMacroInfo.download_url
             
 
             CreateMacroObject(newArgMap)
+        } else {
+            MsgBox("couldnt find " key)
         }
     }
 }
@@ -877,17 +910,18 @@ GetLocalMacros() {
         if (A_LoopFileExt = "AHK") {
             rawContents :=  FileRead(A_MyDocuments . "\SOUP_Macros\Macros\" A_LoopFileName) ; FileRead(A_LoopFileFullPath) ; ReadFile(A_LoopFilePath)
             CurrentVersion := ExtractText(rawContents, "Version")
-
-            newArgMap := Map()
-            
-            newArgMap["name"] := StrSplit(A_LoopFileName, ".")[1]
-            newArgMap["version"] := CurrentVersion
             
             filePath := A_MyDocuments . "\SOUP_Macros\Macros\" A_LoopFileName
+
+            newArgMap := {
+                name: StrSplit(A_LoopFileName, ".")[1],
+                version: CurrentVersion,
+                filename: A_LoopFileName,
+                path: filePath,
+                raw_file: FileRead(filePath)
+            }
             
-            newArgMap["filename"] := A_LoopFileName
-            newArgMap["path"] := filePath
-            newArgMap["raw_file"] := FileRead(filePath)
+            
 
             LocalMacros[A_LoopFileName] := newArgMap
         }
@@ -905,7 +939,6 @@ Loop MacroButtonAmount {
     newButton.SetFont("s11", "Cascadia Code")
 
     if (MacroArray.Has(A_Index)) {
-        MsgBox(MacroArray[A_Index].name)
         newButton.Visible := true
         newButton.Text := MacroArray[A_Index].name
 
