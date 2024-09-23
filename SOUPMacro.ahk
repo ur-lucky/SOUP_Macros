@@ -31,8 +31,16 @@ global PageWhenButtonClicked := -1
 global MacroButtonSelected := -1
 global MainGui_MacroButtonArray := []
 global MainGui_MacroInfoArray := []
-global MacroArray := []
+;global MacroArray := []
 global ProcessedDependencies := []
+
+
+global MacroArray := Array()
+global MacroObjects := Map()
+global LocalMacros := Map()
+
+
+
 
 global ColorMap := Map()
 ColorMap["Unknown"] := "0x858585"
@@ -684,7 +692,7 @@ MainGui_MacroInfoArray.Push(MainGui_MacroInfo_RunMacro)
 
 cachedMacros := []
 
-
+/*
 _InitiateHub() {
     RedrawQuickGui("Checking for updates")
 
@@ -759,7 +767,169 @@ _InitiateHub() {
     MainGui.Show("w400 h370")
 }
 
-_InitiateHub()
+_InitiateHub()*/
+
+CreateMacroObject(argMap) {
+    global MacroArray
+
+    newObj := {
+        name: argMap.Has("name") ? argMap["name"] : "UNKNOWN",
+        description: argMap.Has("description") ? argMap["description"] : "",
+        version: argMap.Has("version") ? argMap["version"] : "1.0.0",
+        status: argMap.Has("status") ? argMap["status"] : "Unknown",
+
+        file_name: argMap.Has("filename") ? argMap["filename"] : "",
+        path:argMap.Has("path") ? argMap["path"] : "",
+
+        commit_history: [],
+        initial_fetch_complete: false
+    }
+
+    if argMap.Has("download_url") {
+        newObj["download_url"] := argMap["download_url"]
+    }
+
+    if argMap.Has("local_path") {
+        newObj["local_path"] := argMap["local_path"]
+        newObj["raw_file"] := argMap["raw_file"]
+    }
+
+    if argMap.Has("is_custom") {
+        newObj["is_custom"] := argMap["is_custom"]
+    }
+
+    MacroArray.Push(newObj)
+}
+
+GetMacrosFromGithub() {
+    raw := GetRawFromURL(GITHUB_API_URL . "Macros")
+    json_response := Jxon_Load(&raw)
+
+    if (!json_response || !IsObject(json_response)) {
+        MsgBox("Failed to load from JSON")
+    }
+
+    FileMap := Map()
+
+    for _, file in json_response {
+        if IsObject(file) && file.has("type") {
+            if file["type"] = "file" {
+                FileMap[file["name"]] := {
+                    name: file["name"],
+                    path: file["path"],
+                    download_url: file["download_url"]
+                }
+            }
+        }
+    }
+
+    return FileMap
+}
+
+GetMacroInformation() {
+    global LocalMacros
+
+    GithubMacros := GetMacrosFromGithub()
+
+    HTTPRequest := ComObject("WinHttp.WinHttpRequest.5.1")
+    HTTPRequest.Open("GET", "https://raw.githubusercontent.com/ur-lucky/SOUP_Macros/main/MacroInformation.json", true)
+    HTTPRequest.Send()
+    HTTPRequest.WaitForResponse()
+    response := HTTPRequest.ResponseText
+    
+    Request_JSON := Jxon_Load(&response)
+
+    for key, config in Request_JSON {
+        if GithubMacros.HasOwnProp(key) {
+            GitubMacroInfo := GithubMacros[key]
+
+            newArgMap := Map()
+            
+            newArgMap["description"] := config.Has("description") ? config["description"] : ""
+            newArgMap["status"] := config.Has("status") ? config["status"] : "Unknown"
+            
+            if LocalMacros.Has(key) {
+                LocalMacro := LocalMacros[key]
+                newArgMap["name"] := LocalMacro["name"]
+                newArgMap["version"] := LocalMacro["version"]
+                newArgMap["filename"] := LocalMacro["filename"]
+                newArgMap["local_path"] := LocalMacro["path"]
+                newArgMap["raw_file"] := LocalMacro["raw_file"]
+            } else {
+                newArgMap["name"] := config.Has("name") ? config["name"] : key
+                newArgMap["version"] := config.Has("version") ? config["version"] : "1.0.0"
+                newArgMap["filename"] := GitubMacroInfo["name"]
+            }
+            
+            newArgMap["path"] := GitubMacroInfo["path"]
+            newArgMap["download_url"] := GitubMacroInfo["download_url"]
+            
+
+            CreateMacroObject(newArgMap)
+        }
+    }
+}
+
+GetLocalMacros() {
+    global LocalMacros
+    
+    Loop Files, A_MyDocuments . "\SOUP_Macros\Macros\*.ahk", "F" {
+        if (A_LoopFileExt = "AHK") {
+            rawContents :=  FileRead(A_MyDocuments . "\SOUP_Macros\Macros\" A_LoopFileName) ; FileRead(A_LoopFileFullPath) ; ReadFile(A_LoopFilePath)
+            CurrentVersion := ExtractText(rawContents, "Version")
+
+            newArgMap := Map()
+            
+            newArgMap["name"] := StrSplit(A_LoopFileName, ".")[1]
+            newArgMap["version"] := CurrentVersion
+            
+            filePath := A_MyDocuments . "\SOUP_Macros\Macros\" A_LoopFileName
+            
+            newArgMap["filename"] := A_LoopFileName
+            newArgMap["path"] := filePath
+            newArgMap["raw_file"] := FileRead(filePath)
+
+            LocalMacros[A_LoopFileName] := newArgMap
+        }
+    }
+}
+
+GetLocalMacros()
+GetMacroInformation()
+
+Loop MacroButtonAmount {
+    if (A_Index = 1) {
+        ;continue
+    }
+    newButton := MainGui.AddButton("x15 y" 85 + (A_Index * 30) - 30 " w160 h26", "")
+    newButton.SetFont("s11", "Cascadia Code")
+
+    if (MacroArray.Has(A_Index)) {
+        MsgBox(MacroArray[A_Index].name)
+        newButton.Visible := true
+        newButton.Text := MacroArray[A_Index].name
+
+    } else {
+        newButton.Visible := false
+        newButton.Text := "none"
+    }
+
+    stupid_reroute_function(newButton, A_Index)
+    MainGui_MacroButtonArray.Push(newButton)
+}
+
+for i, _Array in [MainGui_MacroInfoArray] {
+    for j, Item in _Array {
+        Item.Visible := false
+    }
+}
+
+UpdateMacroPage()
+
+CreateFolders(PATH_DIR, FOLDER_TREE)
+QuickGui.Hide()
+MainGui.Show("w400 h370")
+
 
 F8::ExitApp
 
