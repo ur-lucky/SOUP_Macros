@@ -514,6 +514,7 @@ MacroButtonClicked(ButtonNumber) {
         GetExtraMacroInformation(macroObj)  ; Fetch the data if not already fetched
         if (CurrentPage = PageWhenButtonClicked) and (MacroButtonSelected = ButtonNumber) {
             MainGui_MacroInfo_MacroLastUpdate.Text := macroObj.last_updated
+            MainGui_MacroInfo_RunMacro.Text := "Run Macro"
             MainGui_MacroInfo_RunMacro.Enabled := true
         }
         ;MainGui_MacroInfo_RunMacro.Text := "Run"
@@ -813,13 +814,13 @@ GetMacrosFromGithub() {
     raw := GetRawFromURL(GITHUB_API_URL . "Macros")
     json_response := Jxon_Load(&raw)
 
-    if (!json_response || !IsObject(json_response) || !json_response.Has("Macros")) {
+    if (!json_response || !IsObject(json_response)) {
         MsgBox("Failed to load from JSON")
     }
 
     FileMap := Map()
 
-    for _, file in json_response.Macros {
+    for _, file in json_response {
         if IsObject(file) && file.has("type") {
             if file["type"] = "file" {
                 FileMap[file["name"]] := {
@@ -847,35 +848,55 @@ GetMacroInformation() {
     
     Request_JSON := Jxon_Load(&response)
 
-    for key, config in Request_JSON {
-        if GithubMacros.Has(key) {
-            GitubMacroInfo := GithubMacros[key]
-
-            newArgMap := {}
-            
-            newArgMap.description := config.Has("description") ? config["description"] : ""
-            newArgMap.status := config.Has("status") ? config["status"] : "Unknown"
-            newArgMap.version := config.Has("version") ? config["version"] : "1.0.0"
-            
-            if LocalMacros.Has(key) {
-                LocalMacro := LocalMacros[key]
-                newArgMap.name := LocalMacro.name
-                newArgMap.local_version := LocalMacro.version
-                newArgMap.filename := LocalMacro.filename
-                newArgMap.local_path := LocalMacro.path
-                newArgMap.raw_file := LocalMacro.raw_file
-            } else {
-                newArgMap.name := config.Has("name") ? config["name"] : key
-                newArgMap.filename := GitubMacroInfo.name
+    for mapName, mapObj in Request_JSON {
+        if mapName = "Macros" {
+            for key, config in mapObj {
+                if GithubMacros.Has(key) {
+                    GitubMacroInfo := GithubMacros[key]
+        
+                    newArgMap := {}
+                    
+                    newArgMap.description := config.Has("description") ? config["description"] : ""
+                    newArgMap.status := config.Has("status") ? config["status"] : "Unknown"
+                    newArgMap.version := config.Has("version") ? config["version"] : "1.0.0"
+                    
+                    if LocalMacros.Has(key) {
+                        LocalMacro := LocalMacros[key]
+                        newArgMap.name := LocalMacro.name
+                        newArgMap.local_version := LocalMacro.version
+                        newArgMap.filename := LocalMacro.filename
+                        newArgMap.local_path := LocalMacro.path
+                        newArgMap.raw_file := LocalMacro.raw_file
+                    } else {
+                        newArgMap.name := config.Has("name") ? config["name"] : key
+                        newArgMap.filename := GitubMacroInfo.name
+                    }
+                    
+                    newArgMap.path := GitubMacroInfo.path
+                    newArgMap.download_url := GitubMacroInfo.download_url
+                    
+        
+                    CreateMacroObject(newArgMap)
+                } else {
+                    MsgBox("couldnt find " key)
+                }
             }
-            
-            newArgMap.path := GitubMacroInfo.path
-            newArgMap.download_url := GitubMacroInfo.download_url
-            
+        } else if mapName = "Hub" {
+            HTTPRequest := ComObject("WinHttp.WinHttpRequest.5.1")
+            HTTPRequest.Open("GET", "https://raw.githubusercontent.com/ur-lucky/SOUP_Macros/main/SOUPMacro.ahk", true)
+            HTTPRequest.Send()
+            HTTPRequest.WaitForResponse()
 
-            CreateMacroObject(newArgMap)
-        } else {
-            MsgBox("couldnt find " key)
+            UpdatedFile := HTTPRequest.ResponseText
+            THIS_FILE := A_ScriptFullPath
+            VersionCheckResults := VersionCheck(FileRead(THIS_FILE), UpdatedFile)
+        
+            if (VersionCheckResults.Changed) {
+                FileDelete(THIS_FILE)
+                FileAppend(UpdatedFile, THIS_FILE, "UTF-8-RAW")
+                Run(THIS_FILE)
+                ExitApp
+            }
         }
     }
 }
