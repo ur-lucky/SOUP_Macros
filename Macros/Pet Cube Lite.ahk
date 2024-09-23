@@ -1,14 +1,14 @@
 #Requires AutoHotkey v2.0
 #SingleInstance Force
 
-global MacroName := "Pet Cube"
+global MacroName := "Pet Cube Lite"
 global MacroDescription := "Automatically break boss chest and capture pets"
 global MacroStatus := "Stable"
 
-global Version := "1.0.3"
+global Version := "1.0.0"
 global Dependencies := [
     "Utils\UWBOCRLib.ahk","Utils\Functions.ahk","Utils\PS99Functions.ahk","Storage\PS99UI.ahk",
-    "Modules\Autofarm.ahk","Modules\MoveHumanoid.ahk","Modules\TeleportToWorld.ahk","Modules\TeleportToZone.ahk"
+    "Modules\Autofarm.ahk"
 ]
 
 #Include "%A_MyDocuments%\SOUP_Macros\Utils\UWBOCRLib.ahk"
@@ -16,31 +16,12 @@ global Dependencies := [
 #Include "%A_MyDocuments%\SOUP_Macros\Utils\PS99Functions.ahk"
 #Include "%A_MyDocuments%\SOUP_Macros\Storage\PS99UI.ahk"
 
-#Include "%A_MyDocuments%\SOUP_Macros\Modules\Autofarm.ahk"
-#Include "%A_MyDocuments%\SOUP_Macros\Modules\MoveHumanoid.ahk"
-#Include "%A_MyDocuments%\SOUP_Macros\Modules\TeleportToWorld.ahk"
-#Include "%A_MyDocuments%\SOUP_Macros\Modules\TeleportToZone.ahk"
-
 CoordMode "Pixel", "Client"
 CoordMode "Mouse", "Client"
 SetMouseDelay -1
 
 global isRunning := false
 global ClickCoordinatesPolygon := [{X: 525, Y: 239}, {X: 760, Y: 239}, {X: 678, Y: 315}]
-global MovementMap := Map()
-
-MovementMap["CatchPetsEvent"] := [
-    {Key: "Q"},
-    {Rest: 100},
-    {Key: "D", Duration: 1000},
-    ;{Key: "W", Action: "Down", Duration: 500},
-    {Rest: 1200},
-    {Func: EnableAutofarm},
-    {Key: "S", Duration: 300},
-    {Rest: 1000},
-    {Key: "Q"},
-    {Key: "WheelDown", Repeat: 15, Delay: 200}
-]
 
 
 RandomPositionInShape(CoordinatesArray) {
@@ -88,83 +69,11 @@ RandomPositionInShape(CoordinatesArray) {
 }
 
 
-BossChestBroken() {
-    x1 := 170
-    y1 := 356
-    x2 := 360
-    y2 := 455
-    Bounds1 := RelativeXYToAbsolute(x1,y1)
-    Bounds2 := RelativeXYToAbsolute(x2,y2)
-    width := Bounds2.X - Bounds1.X
-    height := Bounds2.Y - Bounds1.Y
-    ocrResult := OCR.FromRect(Bounds1.X, Bounds1.Y, width, height, "en-us", 1)
-
-    ;Debug("Respawn OCR" ocrResult.Text)
-
-    if (RegExMatch(ocrResult.Text, "Respawn|espawn|spawn") > 0) {
-        return true
-    }
-    return false
-}
-
-BossChestDPSCheck() {
-    x1 := 215
-    y1 := 320
-    x2 := 310
-    y2 := 370
-    Bounds1 := RelativeXYToAbsolute(x1,y1)
-    Bounds2 := RelativeXYToAbsolute(x2,y2)
-    width := Bounds2.X - Bounds1.X
-    height := Bounds2.Y - Bounds1.Y
-    ocrResult := OCR.FromRect(Bounds1.X, Bounds1.Y, width, height, "en-us", 1)
-
-    ;Debug("DPS OCR" ocrResult.Text)
-
-    if (RegExMatch(ocrResult.Text, "DPS") > 0) {
-        return true
-    }
-    return false
-}
-
-
-BossChestIsActive() {
-    FoundRespawnText := BossChestBroken()
-    FoundDPSText := BossChestDPSCheck()
-
-    Debug("FOUND DPS TEXT " TrueFalseToString(FoundDPSText) " FOUND RESPAWN TEXT" TrueFalseToString(FoundDPSText))
-
-    if (FoundDPSText == true && FoundRespawnText == false) {
-        return true
-    }
-    return false
-}
-
 IsBossChestAlive() {
     isDead := PixelSearch(&outX, &outY, 155, 500, 160, 505, "0x765848", 20)
     return not isDead
 }
 
-SetupCharacter() {
-    TeleportToWorld("Teleport_World1")
-    TeleportToWorld("Teleport_World3")
-    TeleportToZone("Elemental Realm")
-    SolveMovement(MovementMap["CatchPetsEvent"])
-}
-
-
-; OCR TEST
-; X: {170, Y: 356} {X: 360 Y: 455}
-
-
-
-; BOSS CHEST
-; X: 158, Y: 502
-
-;"0x765848"
-
-
-; OLD COORDS
-; {X: 760, Y: 370}
 
 
 _RunAutoCatchMacro() {
@@ -196,7 +105,7 @@ _RunAutoCatchMacro() {
         currentTick := A_TickCount
 
         ; initialization
-        SetupCharacter()
+        ;SetupCharacter()
         CurrentSessionStartTick := A_TickCount
         LastCatchPrompt := A_TickCount
 
@@ -232,22 +141,7 @@ _RunAutoCatchMacro() {
                 UIClick("Notification_Yes")
                 LastCatchPrompt := A_TickCount
                 Sleep(750)
-            } else {
-                ;ExitMenus()
-                ;Sleep(300)
             }
-
-            ; if you havnt caught something in 5 minutes, lowkey skill issue
-            if (A_TickCount - LastCatchPrompt > 300000) {
-                ; escape loop to "rejoin"
-                break
-            }
-
-            if (A_TickCount - CurrentSessionStartTick > one_hour) {
-                ; escape loop to "rejoin"
-                break
-            }
-
         }
     }
 }
