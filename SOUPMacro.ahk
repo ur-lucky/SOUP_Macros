@@ -27,8 +27,8 @@ global GITHUB_RAW_URL := "https://raw.githubusercontent.com/ur-lucky/SOUP_Macros
 
 
 global CurrentPage := 1
-global PageWhenButtonClicked := 1
-global MacroButtonSelected := 1
+global PageWhenButtonClicked := -1
+global MacroButtonSelected := -1
 global MainGui_MacroButtonArray := []
 global MainGui_MacroInfoArray := []
 global MacroArray := []
@@ -364,58 +364,61 @@ DependencyCheck(fileContent) {
     return dependencies
 }
 
-ProcessDependencies(dependencyPath) {
-    ; Prevent infinite loops with already processed dependencies
-    if ProcessedDependencies.Has(dependencyPath) {
+ProcessDependencies(rawFileContent) {
+    ; Check for dependencies in the provided raw file content
+    dependencies := DependencyCheck(rawFileContent)
+    
+    ; If there are no dependencies, exit the function early
+    if (dependencies.Length = 0) {
+        OutputDebug("[DEPENDENCY] No dependencies found.")
         return
     }
     
-    ProcessedDependencies.Push(dependencyPath)
-
-    rawDependency := GetDependency(dependencyPath)
-    dependencies := DependencyCheck(rawDependency)
-    
-    dependencySplit := StrSplit(dependencyPath, "\")
-    dependencyFileName := dependencySplit[dependencySplit.Length]
-    dependencyName := StrSplit(dependencyFileName, ".")[1]
-    localPath := PATH_DIR . "\SOUP_Macros\" . dependencyPath
-
-    ; Check if the file already exists
-    if FileExist(localPath) {
-        VersionCheckResults := VersionCheck(FileRead(localPath), rawDependency)
-        if (VersionCheckResults.Changed) {
-            switch MsgBox(
-                "Dependency `"" dependencyName "`" was updated `nWould you like to update?`nCurrent: " VersionCheckResults.Old "`nNew: " VersionCheckResults.New,
-                "SOUP Macros", 
-                "0x1032 0x4"
-            ) {
-                case "Yes":
-                    FileDelete(localPath)
-                    FileAppend(rawDependency, localPath, "UTF-8-RAW")
-                    MsgBox("Updated and running the macro")
-                default:
-                    MsgBox("Running the current version")
+    ; Process each dependency found in the raw file content
+    for _, dependencyPath in dependencies {
+        ; Extract the dependency name and local path for saving
+        dependencyFileName := StrSplit(dependencyPath, "\")[StrSplit(dependencyPath, "\").Length]
+        dependencyName := StrSplit(dependencyFileName, ".")[1]
+        localPath := PATH_DIR . "\SOUP_Macros\" . dependencyPath
+        
+        ; Fetch the raw dependency content from the GitHub repository
+        rawDependency := GetDependency(dependencyPath)
+        
+        ; Check if the dependency file already exists locally
+        if FileExist(localPath) {
+            VersionCheckResults := VersionCheck(FileRead(localPath), rawDependency)
+            if (VersionCheckResults.Changed) {
+                ;switch MsgBox(
+                ;    "Dependency `"" dependencyName "`" was updated `nWould you like to update?`nCurrent: " VersionCheckResults.Old "`nNew: " VersionCheckResults.New,
+                ;    "SOUP Macros", 
+                ;    "0x1032 0x4"
+                ;) {
+                ;    case "Yes":
+                        FileDelete(localPath)
+                        FileAppend(rawDependency, localPath, "UTF-8-RAW")
+                 ;       MsgBox("Updated dependency and saved locally.")
+                 ;   default:
+                 ;       MsgBox("Keeping the current version.")
+                ;}
             }
+        } else {
+            ; If the file doesn't exist locally, offer to install it
+            ;switch MsgBox(
+            ;    "Dependency `"" dependencyName "`" is missing.`nWould you like to install it?", 
+            ;    "SOUP Macros", 
+            ;    "0x1032 0x4"
+            ;) {
+            ;    case "Yes":
+                    FileAppend(rawDependency, localPath, "UTF-8-RAW")
+             ;       MsgBox("Installed missing dependency.")
+            ;}
         }
-    } else {
-        switch MsgBox(
-            "Dependency `"" dependencyName "`" is missing.`nWould you like to install it?", 
-            "SOUP Macros", 
-            "0x1032 0x4"
-        ) {
-            case "Yes":
-                FileAppend(rawDependency, localPath, "UTF-8-RAW")
-        }
-    }
 
-    ; Output debug information about the current dependency
-    OutputDebug("[DEPENDENCY] DETECTED | " dependencyName)
-
-    ; Recursively process each dependency of this dependency
-    for subDependencyPath in dependencies {
-        ProcessDependencies(subDependencyPath)
+        ; Output debug information about the processed dependency
+        OutputDebug("[DEPENDENCY] Processed | " dependencyName)
     }
 }
+
 
 CreateFolders(BasePath, FolderTree) {
     for folder, subFolders in FolderTree.OwnProps() {
@@ -525,15 +528,34 @@ MacroButtonClicked(ButtonNumber) {
         uiElement.Visible := true
     }
 
-    if RegExMatch(macroObj.LastUpdated, "Fetch|Failed") > 0 {
+    ;if RegExMatch(macroObj.LastUpdated, "Fetch|Failed") > 0 {
+    if not macroObj.InitialFetch {
         MainGui_MacroInfo_MacroLastUpdate.Text := "[Fetching...]"
         GetExtraMacroInformation(macroObj)  ; Fetch the data if not already fetched
         if (CurrentPage = PageWhenButtonClicked) and (MacroButtonSelected = ButtonNumber) {
             MainGui_MacroInfo_MacroLastUpdate.Text := macroObj.LastUpdated
+            MainGui_MacroInfo_RunMacro.Enabled := true
         }
-        MainGui_MacroInfo_RunMacro.Enabled := true
         ;MainGui_MacroInfo_RunMacro.Text := "Run"
     }
+}
+
+RunButtonClicked() {
+    global PageWhenButtonClicked
+    global MacroButtonSelected
+
+    MacroIndex := (PageWhenButtonClicked * MacroButtonAmount) - MacroButtonAmount + MacroButtonSelected
+    macroObj := MacroArray.Get(MacroIndex)
+
+    FilePath := PATH_DIR . "\SOUP_Macros\Macros\"
+
+    RedrawQuickGui("Ensuring dependencies are loaded")
+    ProcessDependencies(macroObj.file)
+    QuickGui.Hide()
+
+    Run(macroObj.file)
+
+    ExitApp()
 }
 
 GetExtraMacroInformation(MacroObj) {
@@ -575,7 +597,7 @@ AddToMacroArray(name, rawfile) {
     fileStatus := ExtractText(rawfile, "Status")
     
     MacroObj := {
-        file: rawfile, 
+        file: rawfile,
         name: name, 
         description: fileDescription = "" ? "" : fileDescription, 
         version: fileVersion != "" ? fileVersion : "1.0.0", 
@@ -657,6 +679,7 @@ MainGui_MacroInfoArray.Push(MainGui_MacroInfo_MacroLastUpdate)
 
 MainGui_MacroInfo_RunMacro := MainGui.AddButton("x195 y330 w190 h25 +Center", "Run Macro")
 MainGui_MacroInfo_RunMacro.SetFont("s12 Bold q4", "Cascadia Code")
+MainGui_MacroInfo_RunMacro.OnEvent("Click", (*) => RunButtonClicked())
 MainGui_MacroInfoArray.Push(MainGui_MacroInfo_RunMacro)
 
 cachedMacros := []
@@ -739,6 +762,8 @@ _InitiateHub() {
 _InitiateHub()
 
 F8::ExitApp
+
+
 
 ;VersionTest := GetDependency("Macros\VersionTest.ahk")
 ;ProcessDependencies("Macros\VersionTest.ahk")
