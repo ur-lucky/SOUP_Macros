@@ -1,8 +1,15 @@
 {
-    "Pet Cube.ahk": {
-        "name": "Pet Cube",
-        "description": "test",
-        "status": "Stable",
+    "Hub" : {
+        "name": "SOUP Macro",
         "version": "1.0.0"
+    },
+
+    "Macros": {
+        "Pet Cube.ahk": {
+            "name": "Pet Cube",
+            "description": "test",
+            "status": "Stable",
+            "version": "1.0.0"
+        }
     }
 }

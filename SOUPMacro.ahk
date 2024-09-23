@@ -15,7 +15,8 @@ global FOLDER_TREE := {
     SOUP_Macros: {
         Macros: [],
         Modules: [],
-        Utils: []
+        Utils: [],
+        Storage: []
     }
 }
 
@@ -371,53 +372,28 @@ DependencyCheck(fileContent) {
 }
 
 ProcessDependencies(rawFileContent) {
-    ; Check for dependencies in the provided raw file content
     dependencies := DependencyCheck(rawFileContent)
     
-    ; If there are no dependencies, exit the function early
     if (dependencies.Length = 0) {
         OutputDebug("[DEPENDENCY] No dependencies found.")
         return
     }
     
-    ; Process each dependency found in the raw file content
     for _, dependencyPath in dependencies {
-        ; Extract the dependency name and local path for saving
         dependencyFileName := StrSplit(dependencyPath, "\")[StrSplit(dependencyPath, "\").Length]
         dependencyName := StrSplit(dependencyFileName, ".")[1]
         localPath := PATH_DIR . "\SOUP_Macros\" . dependencyPath
         
-        ; Fetch the raw dependency content from the GitHub repository
         rawDependency := GetDependency(dependencyPath)
         
-        ; Check if the dependency file already exists locally
         if FileExist(localPath) {
             VersionCheckResults := VersionCheck(FileRead(localPath), rawDependency)
             if (VersionCheckResults.Changed) {
-                ;switch MsgBox(
-                ;    "Dependency `"" dependencyName "`" was updated `nWould you like to update?`nCurrent: " VersionCheckResults.Old "`nNew: " VersionCheckResults.New,
-                ;    "SOUP Macros", 
-                ;    "0x1032 0x4"
-                ;) {
-                ;    case "Yes":
-                        FileDelete(localPath)
-                        FileAppend(rawDependency, localPath, "UTF-8-RAW")
-                 ;       MsgBox("Updated dependency and saved locally.")
-                 ;   default:
-                 ;       MsgBox("Keeping the current version.")
-                ;}
+                FileDelete(localPath)
+                FileAppend(rawDependency, localPath, "UTF-8-RAW")
             }
         } else {
-            ; If the file doesn't exist locally, offer to install it
-            ;switch MsgBox(
-            ;    "Dependency `"" dependencyName "`" is missing.`nWould you like to install it?", 
-            ;    "SOUP Macros", 
-            ;    "0x1032 0x4"
-            ;) {
-            ;    case "Yes":
-                    FileAppend(rawDependency, localPath, "UTF-8-RAW")
-             ;       MsgBox("Installed missing dependency.")
-            ;}
+            FileAppend(rawDependency, localPath, "UTF-8-RAW")
         }
 
         ; Output debug information about the processed dependency
@@ -425,12 +401,10 @@ ProcessDependencies(rawFileContent) {
     }
 }
 
-
 CreateFolders(BasePath, FolderTree) {
     for folder, subFolders in FolderTree.OwnProps() {
         fullPath := BasePath "\" folder
         DirCreate(fullPath)
-        ; Recursively create subfolders
         if IsObject(subFolders) {
             CreateFolders(fullPath, subFolders)
         }
@@ -524,10 +498,10 @@ MacroButtonClicked(ButtonNumber) {
 
     if macroObj.initial_fetch_complete {
         MainGui_MacroInfo_RunMacro.Enabled := true
-        ;MainGui_MacroInfo_RunMacro.Text := "Run"
+        MainGui_MacroInfo_RunMacro.Text := "Run Macro"
     } else {
         MainGui_MacroInfo_RunMacro.Enabled := false
-        ;MainGui_MacroInfo_RunMacro.Text := "[Fetching...]"
+        MainGui_MacroInfo_RunMacro.Text := "[Fetching...]"
     }
 
     for _, uiElement in MainGui_MacroInfoArray {
@@ -561,9 +535,12 @@ RunButtonClicked() {
         ) {
             case "Yes":
                 newFile := GetDependency(macroObj.path)
+                newPath := A_MyDocuments . "\SOUP_Macros\" . macroObj.path
                 macroObj.raw_file := newFile
-                FileAppend(newFile, macroObj.local_path, "UTF-8-RAW")
-                MsgBox("Installed missing dependency.")
+                macroObj.local_path := newPath
+
+                FileAppend(newFile, newPath, "UTF-8-RAW")
+                MsgBox("Installed " macroObj.name)
         }
     } else if macroObj.HasOwnProp("local_version") {
         if macroObj.version != macroObj.local_version {
@@ -577,9 +554,9 @@ RunButtonClicked() {
                     newFile := GetDependency(macroObj.path)
                     macroObj.raw_file := newFile
                     FileAppend(newFile, macroObj.local_path, "UTF-8-RAW")
-                    MsgBox("Updated macro and saved locally.")
+                    MsgBox("Updated macro")
                 default:
-                    MsgBox("Keeping the current version.")
+                    MsgBox("Keeping the current version & running")
             }
         }
     }
@@ -836,13 +813,13 @@ GetMacrosFromGithub() {
     raw := GetRawFromURL(GITHUB_API_URL . "Macros")
     json_response := Jxon_Load(&raw)
 
-    if (!json_response || !IsObject(json_response)) {
+    if (!json_response || !IsObject(json_response) || !json_response.Has("Macros")) {
         MsgBox("Failed to load from JSON")
     }
 
     FileMap := Map()
 
-    for _, file in json_response {
+    for _, file in json_response.Macros {
         if IsObject(file) && file.has("type") {
             if file["type"] = "file" {
                 FileMap[file["name"]] := {
@@ -928,6 +905,7 @@ GetLocalMacros() {
     }
 }
 
+CreateFolders(PATH_DIR, FOLDER_TREE)
 GetLocalMacros()
 GetMacroInformation()
 
@@ -959,7 +937,6 @@ for i, _Array in [MainGui_MacroInfoArray] {
 
 UpdateMacroPage()
 
-CreateFolders(PATH_DIR, FOLDER_TREE)
 QuickGui.Hide()
 MainGui.Show("w400 h370")
 
