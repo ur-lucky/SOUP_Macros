@@ -542,6 +542,8 @@ RunButtonClicked() {
 
                 FileAppend(newFile, newPath, "UTF-8-RAW")
                 MsgBox("Installed " macroObj.name)
+            case "No":
+                return
         }
     } else if macroObj.HasOwnProp("local_version") {
         if macroObj.version != macroObj.local_version {
@@ -959,12 +961,12 @@ for i, _Array in [MainGui_MacroInfoArray] {
 UpdateMacroPage()
 
 QuickGui.Hide()
-MainGui.Show("w400 h370")
+MainGui.Show("w400 h370 xCenter y200")
+;VersionTest := GetDependency("Macros\VersionTest.ahk")
+;ProcessDependencies("Macros\VersionTest.ahk")
 
 
 F8::ExitApp
 
 
-
-;VersionTest := GetDependency("Macros\VersionTest.ahk")
-;ProcessDependencies("Macros\VersionTest.ahk")
+; this is just a temporary file :)
