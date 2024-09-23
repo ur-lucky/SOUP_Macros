@@ -140,6 +140,11 @@ BossChestIsActive() {
     return false
 }
 
+IsBossChestAlive() {
+    isDead := PixelSearch(&outX, &outY, 155, 500, 160, 505, "0x765848", 20)
+    return not isDead
+}
+
 SetupCharacter() {
     TeleportToWorld("Teleport_World1")
     TeleportToWorld("Teleport_World3")
@@ -210,7 +215,7 @@ _RunAutoCatchMacro() {
 
             ; only need to check every 5 seconds
             if (A_TickCount - LastChestCheckTick > 5000) {
-                if (BossChestIsActive()) {
+                if (IsBossChestAlive()) {
                     ; don't need to do a pixel search or check for time
                     SendEvent("{R Down}{R Up}")
                 } 
