@@ -862,9 +862,6 @@ GetMacroInformation() {
                     newArgMap.description := config.Has("description") ? config["description"] : ""
                     newArgMap.status := config.Has("status") ? config["status"] : "Unknown"
                     newArgMap.version := config.Has("version") ? config["version"] : "1.0.0"
-
-
-                    MsgBox("found description " newArgMap.description)
                     
                     if LocalMacros.Has(key) {
                         LocalMacro := LocalMacros[key]
