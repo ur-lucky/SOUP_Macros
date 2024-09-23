@@ -3,7 +3,7 @@
 
 global MacroName := "Pet Cube"
 global MacroDescription := "Automatically break boss chest and capture pets"
-global MacroStatus := "Unstable"
+global MacroStatus := "Stable"
 
 global Version := "1.0.0"
 global Dependencies := [
@@ -37,7 +37,7 @@ MovementMap["CatchPetsEvent"] := [
     ;{Key: "W", Action: "Down", Duration: 500},
     {Rest: 1200},
     {Func: EnableAutofarm},
-    {Key: "S", Duration: 325},
+    {Key: "S", Duration: 300},
     {Rest: 1000},
     {Key: "Q"},
     {Key: "WheelDown", Repeat: 15, Delay: 200}
