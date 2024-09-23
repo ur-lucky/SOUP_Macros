@@ -65,7 +65,8 @@ PS99_UI_POSITION_MAP["Notification_Scroll"] := {Position: {X: 631, Y: 150}, Boun
 ; HUD
 PS99_UI_POSITION_MAP["HUD_Gift_Button"] := {Position: {X: 40, Y: 188}, Bounds: [{X: 23, Y: 172}, {X: 58, Y: 197}]}
 PS99_UI_POSITION_MAP["HUD_Teleport_Button"] := {Position: {X: 106, Y: 188}, Bounds: [{X: 92, Y: 180}, {X: 115, Y: 200}]}
-PS99_UI_POSITION_MAP["HUD_Teleport_Button_Red"] := {Position: {X: 623, Y: 111}, Bounds: [{X: 104, Y: 186}, {X: 113, Y: 200}]}
+;PS99_UI_POSITION_MAP["HUD_Teleport_Button_Red"] := {Position: {X: 623, Y: 111}, Bounds: [{X: 104, Y: 186}, {X: 113, Y: 200}]}
+PS99_UI_POSITION_MAP["HUD_Teleport_Button_Red"] := {Position: {X: 623, Y: 111}, Bounds: [{X: 100, Y: 182}, {X: 110, Y: 203}]}
 ;Lower bounds ({X: 112, Y: 192})
 
 PS99_UI_POSITION_MAP["HUD_Hoverboard_Button"] := {Position: {X: 40, Y: 247}, Bounds: [{X: 597, Y: 87}, {X: 650, Y: 135}]}
