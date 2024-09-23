@@ -389,8 +389,8 @@ ProcessDependencies(rawFileContent) {
         if FileExist(localPath) {
             CurrentFile := FileRead(localPath)
             VersionCheckResults := VersionCheck(CurrentFile, rawDependency)
-            OutputDebug("[DEPENDENCY] VERSION CHANGED FOR DEPENDENCY | " dependencyName " | " VersionCheckResults.New " | " VersionCheckResults.Old)
             if (VersionCheckResults.Changed) {
+                OutputDebug("[DEPENDENCY] VERSION CHANGED FOR DEPENDENCY | " dependencyName " | " VersionCheckResults.New " | " VersionCheckResults.Old)
                 FileDelete(localPath)
                 FileAppend(rawDependency, localPath, "UTF-8-RAW")
             }
@@ -865,6 +865,8 @@ GetMacroInformation() {
                     newArgMap.status := config.Has("status") ? config["status"] : "Unknown"
                     newArgMap.version := config.Has("version") ? config["version"] : "1.0.0"
                     
+                    OutputDebug("[DEBUG] Found version " newArgMap.version)
+
                     if LocalMacros.Has(key) {
                         LocalMacro := LocalMacros[key]
                         newArgMap.name := LocalMacro.name
