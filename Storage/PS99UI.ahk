@@ -1,6 +1,6 @@
 ﻿#Requires AutoHotkey v2.0
 
-global Version := "1.0.1"
+global Version := "1.0.2"
 global Dependencies := []
 
 global PS99_UI_POSITION_MAP := Map()
@@ -28,8 +28,8 @@ PS99_UI_COLOR_MAP["Ignore"] := {Color: "0x7DF50D", Variation: 5}
 PS99_UI_COLOR_MAP["Warning_Cat_Grey"] := {Color: "0x95A9CD", Variation: 5}
 
 ; HUD teleport button
-PS99_UI_COLOR_MAP["HUD_Teleport_Button_Red"] := {Color: "0xDB113F", Variation: 5}
-PS99_UI_COLOR_MAP["HUD_Teleport_Button_Grey"] := {Color: "0x60ACA4", Variation: 5}
+PS99_UI_COLOR_MAP["HUD_Teleport_Button_Red"] := {Color: "0xDB113F", Variation: 10}
+PS99_UI_COLOR_MAP["HUD_Teleport_Button_Grey"] := {Color: "0x60ACA4", Variation: 10}
 
 PS99_UI_COLOR_MAP["HUD_SuperComputer_Blue"] := {Color: "0x27D4EF", Variation: 8}
 
@@ -65,7 +65,7 @@ PS99_UI_POSITION_MAP["Notification_Scroll"] := {Position: {X: 631, Y: 150}, Boun
 ; HUD
 PS99_UI_POSITION_MAP["HUD_Gift_Button"] := {Position: {X: 40, Y: 188}, Bounds: [{X: 23, Y: 172}, {X: 58, Y: 197}]}
 PS99_UI_POSITION_MAP["HUD_Teleport_Button"] := {Position: {X: 106, Y: 188}, Bounds: [{X: 92, Y: 180}, {X: 115, Y: 200}]}
-PS99_UI_POSITION_MAP["HUD_Teleport_Button_Red"] := {Position: {X: 623, Y: 111}, Bounds: [{X: 106, Y: 186}, {X: 112, Y: 200}]}
+PS99_UI_POSITION_MAP["HUD_Teleport_Button_Red"] := {Position: {X: 623, Y: 111}, Bounds: [{X: 104, Y: 186}, {X: 113, Y: 200}]}
 ;Lower bounds ({X: 112, Y: 192})
 
 PS99_UI_POSITION_MAP["HUD_Hoverboard_Button"] := {Position: {X: 40, Y: 247}, Bounds: [{X: 597, Y: 87}, {X: 650, Y: 135}]}

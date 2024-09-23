@@ -387,7 +387,9 @@ ProcessDependencies(rawFileContent) {
         rawDependency := GetDependency(dependencyPath)
         
         if FileExist(localPath) {
-            VersionCheckResults := VersionCheck(FileRead(localPath), rawDependency)
+            CurrentFile := FileRead(localPath)
+            VersionCheckResults := VersionCheck(CurrentFile, rawDependency)
+            OutputDebug("[DEPENDENCY] VERSION CHANGED FOR DEPENDENCY | " dependencyName " | " VersionCheckResults.New " | " VersionCheckResults.Old)
             if (VersionCheckResults.Changed) {
                 FileDelete(localPath)
                 FileAppend(rawDependency, localPath, "UTF-8-RAW")
