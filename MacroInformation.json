@@ -1,8 +1,8 @@
 {
-    "Pet Cube": {
-        "Name": "Pet Cube",
-        "Description": "test",
-        "Status": "Stable",
-        "Version": "1.0.0"
+    "Pet Cube.ahk": {
+        "name": "Pet Cube",
+        "description": "test",
+        "status": "Stable",
+        "version": "1.0.0"
     }
 }
