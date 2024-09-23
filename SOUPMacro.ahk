@@ -178,8 +178,16 @@ GetRawFromURL(url) {
 
             if (Download.Status != 200) {
                 OutputDebug("[DEBUG] | API LIMIT | " RawResponse)
-                MsgBox "API rate limit exceeded. Retrying..."
-                Sleep(retryWaitTime * A_Index)  ; Wait 10 seconds before retrying (can be longer)
+
+                timeElapsed := 0
+                startTick := A_TickCount
+
+                while timeElapsed <= retryWaitTime {
+                    timeElapsed := A_TickCount - startTick
+                    QuickGuiText.Text := "Retrying in... " . Round((retryWaitTime - timeElapsed) / 1000)
+                    Sleep(90)
+                }
+
                 continue
             } else {
                 return RawResponse
@@ -377,7 +385,7 @@ Hub_MacroGroupBox := HubGui.AddGroupBox("x10 y85 w150 h200 +Center ", "Macro")
 
 
 _init() {
-    RedrawQuickGui("Checking for updates")
+    QuickGuiText.Text = "Checking for updates"
 
     UpdatedScript := GetDependency("SOUPMacro.ahk")
 
@@ -393,7 +401,7 @@ _init() {
         ExitApp
     }
 
-    RedrawQuickGui("Initializing")
+    QuickGuiText.Text = "Initializing"
     CreateFolders(PATH_DIR, FOLDER_TREE)
 
     GetDependency("")
