@@ -1,6 +1,6 @@
 ﻿#Requires AutoHotkey v2.0
 
-global Version := "1.0.2"
+global Version := "1.0.3"
 global Dependencies := []
 
 global PS99_UI_POSITION_MAP := Map()
@@ -28,8 +28,8 @@ PS99_UI_COLOR_MAP["Ignore"] := {Color: "0x7DF50D", Variation: 5}
 PS99_UI_COLOR_MAP["Warning_Cat_Grey"] := {Color: "0x95A9CD", Variation: 5}
 
 ; HUD teleport button
-PS99_UI_COLOR_MAP["HUD_Teleport_Button_Red"] := {Color: "0xDB113F", Variation: 10}
-PS99_UI_COLOR_MAP["HUD_Teleport_Button_Grey"] := {Color: "0x60ACA4", Variation: 10}
+PS99_UI_COLOR_MAP["HUD_Teleport_Button_Red"] := {Color: "0xDB113F", Variation: 30}
+PS99_UI_COLOR_MAP["HUD_Teleport_Button_Grey"] := {Color: "0x60ACA4", Variation: 30}
 
 PS99_UI_COLOR_MAP["HUD_SuperComputer_Blue"] := {Color: "0x27D4EF", Variation: 8}
 
