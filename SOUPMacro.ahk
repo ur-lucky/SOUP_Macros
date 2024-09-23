@@ -1,7 +1,12 @@
 ﻿#Requires AutoHotkey v2.0
 #SingleInstance Force
 
-global Version := "1"
+major_version := 0
+minor_version := 0
+patch_version := 0
+label := "alpha"
+
+MacroButtonAmount := 8
 
 global PATH_DIR := A_MyDocuments
 global FOLDER_TREE := {
@@ -12,13 +17,19 @@ global FOLDER_TREE := {
     }
 }
 
-global GITHUB_API_URL := "https://api.github.com/repos/ur-lucky/SOUP_Macros/contents/"  ; GitHub API URL for your folder
-global GITHUB_RAW_URL := "https://raw.githubusercontent.com/ur-lucky/SOUP_Macros/main/" ; Raw URL to fetch files
+global Menu_Version := major_version "." minor_version "." patch_version (label != "" ? "-" label : "")
+global GITHUB_API_URL := "https://api.github.com/repos/ur-lucky/SOUP_Macros/contents/"
+global GITHUB_RAW_URL := "https://raw.githubusercontent.com/ur-lucky/SOUP_Macros/main/"
+
+
+global CurrentPage := 1
+global PageWhenButtonClicked := 1
+global MacroButtonSelected := 1
+global MainGui_MacroButtonArray := []
+global MainGui_MacroInfoArray := []
+global MacroArray := []
 global ProcessedDependencies := []
 
-global ColorMap := Map()
-ColorMap["Stable"] := "0x00ff4c"
-ColorMap["Unstable"] := "0xdd0000"
 
 QuickGui := Gui(Options := "+AlwaysOnTop -Caption -SysMenu", Title := "Preload")
 QuickGui.SetFont("s15 w450 q2")
@@ -31,6 +42,39 @@ RedrawQuickGui(NewText := "text", Duration := 0) {
 
     if (Duration != 0) {
         SetTimer(QuickGui.Hide(), -Duration)
+    }
+}
+
+; Core functions
+
+StrJoin(array, seperator) {
+    filePath := ""
+
+    for index, element in array {
+        if index > 1 {
+            filePath .= "\"
+        }
+        filePath .= element
+    }
+
+    return filePath
+}
+
+ExtractVersion(Text) {
+    if RegExMatch(Text, 'Version\s*:=\s*"(.*?)"', &match) {
+        return match[1]
+    }
+    return "?"
+}
+
+VersionCheck(old, new) {
+    OldVersion := ExtractVersion(old)
+    NewVersion := ExtractVersion(new)
+
+    if OldVersion = NewVersion {
+        return {Changed: false, Old: OldVersion, New: NewVersion}
+    } else {
+        return {Changed: true, Old: OldVersion, New:NewVersion}
     }
 }
 
@@ -143,20 +187,6 @@ Jxon_Load(&src, args*) {
 	return tree[1]
 }
 
-
-StrJoin(array, seperator) {
-    filePath := ""
-
-    for index, element in array {
-        if index > 1 {
-            filePath .= "\"
-        }
-        filePath .= element
-    }
-
-    return filePath
-}
-
 GetRawFromURL(url) {
     OutputDebug("[DEBUG] | MAKING A REQUEST")
     retries := 6  ; Number of retries
@@ -212,14 +242,6 @@ GetRawFromURL(url) {
     return ""
 }
 
-
-
-GetDependency(dependencyString) {
-    urlPath := GITHUB_RAW_URL . StrReplace(dependencyString, "\", "/")  ; Use "/" for GitHub API paths
-    raw := GetRawFromURL(urlPath)
-    return raw
-}
-
 GetFilesFromGithub(pathArray, downloadFiles := false) {
     ; Build the URL for the GitHub API
     urlPath := GITHUB_API_URL . StrReplace(StrJoin(pathArray, "/"), "\", "/")  ; Use "/" for GitHub API paths
@@ -264,22 +286,10 @@ GetFilesFromGithub(pathArray, downloadFiles := false) {
     return FileMap
 }
 
-ExtractVersion(Text) {
-    if RegExMatch(Text, 'Version\s*:=\s*"(.*?)"', &match) {
-        return match[1]
-    }
-    return "?"
-}
-
-VersionCheck(old, new) {
-    OldVersion := ExtractVersion(old)
-    NewVersion := ExtractVersion(new)
-
-    if OldVersion = NewVersion {
-        return {Changed: false, Old: OldVersion, New: NewVersion}
-    } else {
-        return {Changed: true, Old: OldVersion, New:NewVersion}
-    }
+GetDependency(dependencyString) {
+    urlPath := GITHUB_RAW_URL . StrReplace(dependencyString, "\", "/")  ; Use "/" for GitHub API paths
+    raw := GetRawFromURL(urlPath)
+    return raw
 }
 
 DependencyCheck(fileContent) {
@@ -304,26 +314,6 @@ DependencyCheck(fileContent) {
     }
 
     return dependencies
-}
-
-
-
-
-;global UtilsMap := GetFilesFromGithub(["Utils"])
-;global ModulesMap := GetFilesFromGithub(["Modules"])
-;global MacrosMap := GetFilesFromGithub(["Macros"], true)
-
-;global FileMap := GetFilesFromGithub([])
-
-CreateFolders(BasePath, FolderTree) {
-    for folder, subFolders in FolderTree.OwnProps() {
-        fullPath := BasePath "\" folder
-        DirCreate(fullPath)
-        ; Recursively create subfolders
-        if IsObject(subFolders) {
-            CreateFolders(fullPath, subFolders)
-        }
-    }
 }
 
 ProcessDependencies(dependencyPath) {
@@ -379,27 +369,168 @@ ProcessDependencies(dependencyPath) {
     }
 }
 
-HubGui := Gui(Options := "", Title := "SOUP Macro")
-HubGui.BackColor := "ffffff"
+CreateFolders(BasePath, FolderTree) {
+    for folder, subFolders in FolderTree.OwnProps() {
+        fullPath := BasePath "\" folder
+        DirCreate(fullPath)
+        ; Recursively create subfolders
+        if IsObject(subFolders) {
+            CreateFolders(fullPath, subFolders)
+        }
+    }
+}
+
+; UI Functions
+
+UpdateMacroPage() {
+    global CurrentPage
+    global MacroArray
+
+    TotalMacros := MacroArray.Length
+    MaxPages := Ceil(TotalMacros / MacroButtonAmount)
+
+    Loop MacroButtonAmount {
+        MacroIndexNumber := (CurrentPage * MacroButtonAmount) - MacroButtonAmount + A_Index
+        OutputDebug("[DEBUG] MACRO INDEX NUMBER " MacroIndexNumber)
+        button := MainGui_MacroButtonArray.Get(A_Index)
+        if MacroArray.Has(MacroIndexNumber) {
+            macroObj := MacroArray.Get(MacroIndexNumber)
+            button.Text := macroObj.name
+            button.Visible := true
+        } else {
+            button.Visible := false
+        }
+    }
+    MainGui_MacroPageNumber.Text := CurrentPage . "/" . MaxPages
+}
+
+ChangeMacroPage(Index := "Next") {
+    global CurrentPage
+    global MacroArray
+
+    TotalMacros := MacroArray.Length
+    MaxPages := Ceil(TotalMacros / MacroButtonAmount)
+
+    if (TotalMacros <= MacroButtonAmount) {
+        return
+    }
+
+    switch Index {
+        case "Next":
+            if (CurrentPage + 1) > MaxPages {
+                CurrentPage := 1
+                UpdateMacroPage()
+                return
+            }
+            CurrentPage += 1
+            UpdateMacroPage()
+        case "Previous":
+            if (CurrentPage - 1) <= 0 {
+                CurrentPage := MaxPages
+                UpdateMacroPage()
+                return
+            }
+            CurrentPage -= 1
+            UpdateMacroPage()
+    }
+}
+
+MacroButtonClicked(buttonNumber) {
+    global CurrentPage
+    global PageWhenButtonClicked
+    global MacroButtonSelected
+
+    if (CurrentPage = PageWhenButtonClicked) and (MacroButtonSelected = buttonNumber) {
+        return ; user clicked on the same button
+    }
+
+    PageWhenButtonClicked := CurrentPage
+    MacroButtonSelected := buttonNumber
+
+    MacroIndex := (CurrentPage * MacroButtonAmount) - MacroButtonAmount + buttonNumber
+
+    macroObj := MacroArray.Get(MacroIndex)
+
+    MainGui_MacroInfo_MacroName.Text := macroObj.name
+    MainGui_MacroInfo_MacroVersion.Text := macroObj.version
+    MainGui_MacroInfo_MacroDescription.Text := macroObj.description
+    MainGui_MacroInfo_MacroStatusLabel.Text := macroObj.status
+
+ 
+}
 
 
-HubTitle := HubGui.AddText("x5 y6 w300 h40 +Center", "SOUP Macro")
-HubTitle.SetFont("s25 Bold q3 c000000", "Comic Sans MS")
+MainGui := Gui(Options := "+AlwaysOnTop", Title := "SOUP Macro | Version: " Menu_Version)
+MainGui.BackColor := "ffffff"
 
-;Hub_MacroGroupBoxTitle := HubGui.AddText("x10 y60 w150 h20 +Center", "Macro")
-Hub_MacroGroupBox := HubGui.AddGroupBox("x10 y85 w150 h200 +Center ", "Macro")
+MainGui_Title := MainGui.AddText("w400 h35 x0 y8 +Center", "SOUP Clan")
+MainGui_Title.SetFont("s20 Bold q4", "Cascadia Code")
+
+;MainGui_Version := MainGui.AddText("w400 h25 x0 y43 +Center", "V" Menu_Version)
+
+; Macro List
+
+MainGui_MacroGroupBox := MainGui.AddGroupBox("x10 y75 w170 h250")
+MainGui_MacroGroupBoxTitle := MainGui.AddText("x10 y50 w170 h30 +Center", "Macro List")
+MainGui_MacroGroupBoxTitle.SetFont("s16 Bold q4", "Cascadia Code")
+
+MainGui_MacroPreviousPage := MainGui.AddButton("x40 y331 w30 h30", "<")
+MainGui_MacroPreviousPage.SetFont("s16 Bold q4", "Cascadia Code")
+MainGui_MacroPreviousPage.OnEvent("Click", (*) => ChangeMacroPage("Previous"))
+
+MainGui_MacroPageNumber := MainGui.AddText("x75 y334 w40 h30 +Center", "1/1")
+MainGui_MacroPageNumber.SetFont("s12 Bold q4", "Cascadia Code")
+
+MainGui_MacroNextPage := MainGui.AddButton("x120 y331 w30 h30", ">")
+MainGui_MacroNextPage.SetFont("s16 Bold q4", "Cascadia Code")
+MainGui_MacroNextPage.OnEvent("Click", (*) => ChangeMacroPage("Next"))
+
+; Macro Info
+
+MainGui_MacroInfo_GroupBox := MainGui.AddGroupBox("x190 y75 w200 h285")
+
+MainGui_MacroInfo_GroupBoxTitle := MainGui.AddText("x190 y50 w200 h30 +Center", "Info")
+MainGui_MacroInfo_GroupBoxTitle.SetFont("s16 Bold q4", "Cascadia Code")
+
+MainGui_MacroInfo_MacroName := MainGui.AddText("x195 y84 w190 h24 +Center", "[Name]")
+MainGui_MacroInfo_MacroName.SetFont("s14 Bold q4", "Cascadia Code")
+MainGui_MacroInfoArray.Push(MainGui_MacroInfo_MacroName)
+
+MainGui_MacroInfo_MacroVersion := MainGui.AddText("x195 y108 w190 h16 +Center", "[Version]")
+MainGui_MacroInfo_MacroVersion.SetFont("s8 Bold q4", "Cascadia Code")
+MainGui_MacroInfoArray.Push(MainGui_MacroInfo_MacroVersion)
+
+MainGui_MacroInfo_MacroDescription := MainGui.AddText("x195 y130 w190 h80 +Center", "[Description] `nya`nya`nya`nya")
+MainGui_MacroInfo_MacroDescription.SetFont("s11 Bold q4", "Cascadia Code")
+MainGui_MacroInfoArray.Push(MainGui_MacroInfo_MacroDescription)
+
+MainGui_MacroInfo_MacroStatusLabel := MainGui.AddText("x195 y220 w190 h24 +Center", "Status")
+MainGui_MacroInfo_MacroStatusLabel.SetFont("s14 Bold q4", "Cascadia Code")
+MainGui_MacroInfoArray.Push(MainGui_MacroInfo_MacroStatusLabel)
+
+MainGui_MacroInfo_MacroStatus := MainGui.AddText("x195 y245 w190 h20 +Center", "[this is a status]")
+MainGui_MacroInfo_MacroStatus.SetFont("s11 Bold q4", "Cascadia Code")
+MainGui_MacroInfoArray.Push(MainGui_MacroInfo_MacroStatus)
+
+MainGui_MacroInfo_MacroLastUpdateLabel := MainGui.AddText("x195 y275 w190 h24 +Center", "Last Update")
+MainGui_MacroInfo_MacroLastUpdateLabel.SetFont("s14 Bold q4", "Cascadia Code")
+MainGui_MacroInfoArray.Push(MainGui_MacroInfo_MacroLastUpdateLabel)
+
+MainGui_MacroInfo_MacroLastUpdate := MainGui.AddText("x195 y300 w190 h20 +Center", "[x days ago]")
+MainGui_MacroInfo_MacroLastUpdate.SetFont("s11 Bold q4", "Cascadia Code")
+MainGui_MacroInfoArray.Push(MainGui_MacroInfo_MacroLastUpdate)
 
 
-_init() {
-    ;QuickGuiText.Text := "Checking for updates"
+cachedMacros := []
+
+
+_InitiateHub() {
     RedrawQuickGui("Checking for updates")
 
     UpdatedScript := GetDependency("SOUPMacro.ahk")
-
     THIS_FILE := A_ScriptFullPath
     VersionCheckResults := VersionCheck(FileRead(THIS_FILE), UpdatedScript)
 
-    
     if (VersionCheckResults.Changed) {
         OutputDebug("[DEBUG] FILE UPDATED | CURRENT: " VersionCheckResults.Old " | NEW: " VersionCheckResults.New)
         FileDelete(THIS_FILE)
@@ -408,19 +539,57 @@ _init() {
         ExitApp
     }
 
-    ;QuickGuiText.Text := "Initializing"
     RedrawQuickGui("Initializing")
+
+    ; check for cached macros
+    Loop Files, PATH_DIR . "\SOUP_Macros\Macros\*.ahk", "F" {
+        if (A_LoopFileExt = "AHK") {
+            rawContents :=  FileRead(PATH_DIR . "\SOUP_Macros\Macros\" A_LoopFileName) ; FileRead(A_LoopFileFullPath) ; ReadFile(A_LoopFilePath)
+            cachedMacros.Push({file: rawContents, name: dependencyName := StrSplit(A_LoopFileName, ".")[1]})
+        }
+    }
+
+    for _, macroObject in cachedMacros {
+        ;MacroArray.Push(macroObject)
+    }
+
+    Loop MacroButtonAmount {
+        if (A_Index = 1) {
+            ;continue
+        }
+        newButton := MainGui.AddButton("x15 y" 85 + (A_Index * 30) - 30 " w160 h25", "")
+        newButton.SetFont("s11", "Cascadia Code")
+    
+        if (cachedMacros.Has(A_Index)) {
+            newButton.Visible := true
+            newButton.Text := cachedMacros[A_Index].name
+    
+        } else {
+            newButton.Visible := false
+            newButton.Text := "none"
+        }
+    
+        newButton.OnEvent("Click", (*) => MacroButtonClicked(A_Index))
+    
+        MainGui_MacroButtonArray.Push(newButton)
+    }
+
+    for i, _Array in [MainGui_MacroInfoArray] {
+        for j, Item in _Array {
+            Item.Visible := false
+        }
+    }
+
+    UpdateMacroPage()
+
     CreateFolders(PATH_DIR, FOLDER_TREE)
-
-    GetDependency("")
-
     QuickGui.Hide()
-    HubGui.Show()
+    MainGui.Show("w400 h370")
 }
 
-_init()
+_InitiateHub()
 
-F8::ExitApp()
+F8::ExitApp
 
 ;VersionTest := GetDependency("Macros\VersionTest.ahk")
 ;ProcessDependencies("Macros\VersionTest.ahk")
