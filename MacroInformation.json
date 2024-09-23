@@ -15,7 +15,7 @@
             "name": "Pet Cube Lite",
             "description": "Doesn't automatically move you to the required position",
             "status": "Stable",
-            "version": "1.0.0"
+            "version": "1.0.1"
         }
     }
 }
