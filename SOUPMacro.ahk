@@ -897,11 +897,13 @@ GetMacroInformation() {
 
             UpdatedFile := HTTPRequest.ResponseText
             THIS_FILE := A_ScriptFullPath
-            VersionCheckResults := VersionCheck(FileRead(THIS_FILE), UpdatedFile)
+
+            newVersion := config.Has("version") ? config["version"] : "1.0.0"
+            currentVersion := ExtractText(FileRead(THIS_FILE), "Version")
         
-            if (VersionCheckResults.Changed) {
+            if (newVersion != currentVersion) {
                 FileDelete(THIS_FILE)
-                FileAppend(UpdatedFile, THIS_FILE, "UTF-8-RAW")
+                FileAppend(RegExReplace(UpdatedFile, 'Version\s*:=\s*"(.*?)"', 'Version := "' . newVersion . '"'), THIS_FILE, "UTF-8-RAW")
                 Run(THIS_FILE)
                 ExitApp
             }
