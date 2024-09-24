@@ -886,7 +886,7 @@ GetMacroInformation() {
         
                     CreateMacroObject(newArgMap)
                 } else {
-                    MsgBox("couldnt find " key)
+                    MsgBox("[DEBUG] couldnt find " key)
                 }
             }
         } else if mapName = "Hub" {
