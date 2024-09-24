@@ -9,7 +9,7 @@
             "name": "Pet Cube",
             "description": "F3 Start\nF5 Pause\nF8 Exit",
             "status": "Stable",
-            "version": "1.0.4"
+            "version": "1.1.0"
         },
         "Auto Catcher.ahk": {
             "name": "Auto Catcher",
