@@ -5,7 +5,7 @@ global MacroName := "Pet Cube"
 global MacroDescription := "Automatically break boss chest and capture pets"
 global MacroStatus := "Stable"
 
-global Version := "1.0.0"
+global Version := "1.1.0"
 global Dependencies := [
     "Utils\UWBOCRLib.ahk","Utils\Functions.ahk","Utils\PS99Functions.ahk","Storage\PS99UI.ahk",
     "Modules\Autofarm.ahk","Modules\MoveHumanoid.ahk","Modules\TeleportToWorld.ahk","Modules\TeleportToZone.ahk"
@@ -26,21 +26,21 @@ CoordMode "Mouse", "Client"
 SetMouseDelay -1
 
 global isRunning := false
-global ClickCoordinatesPolygon := [{X: 185, Y: 53 - 31}, {X: 605, Y: 53 - 31}, {X: 605, Y: 200 - 31}, {X: 185, Y: 200 - 31}]
+global ClickCoordinatesPolygon := [{X: 185, Y: 53}, {X: 605, Y: 53}, {X: 605, Y: 200}, {X: 185, Y: 200}]
 global mountedGuis := []
 global focusDebounce := 250  ; 250ms debounce time for window focus checks
 global windows := []  ; Array to hold data for each window
 
 global colorsToSearch := [
-    {color: "0x6268C5", variation: 20},
-    {color: "0x314AB6", variation: 20},
-    {color: "0x2D4B54", variation: 20},
-    {color: "0X445A46", variation: 20},
-    {color: "0xFB6408", variation: 20},
-    {color: "0xfbd608", variation: 20},
-    {color: "0XFFFF32", variation: 20},
-    {color: "0xbd34eb", variation: 20},
-    {color: "0xDC74FF", variation: 20},
+    {color: "0x6268C5", variation: 60},
+    {color: "0x314AB6", variation: 60},
+    {color: "0xFB6408", variation: 60},
+    {color: "0xfbd608", variation: 60},
+    {color: "0XFFFF32", variation: 60},
+    {color: "0xbd34eb", variation: 60},
+    {color: "0xDC74FF", variation: 60},
+    {color: "0x2D4B54", variation: 60},
+    {color: "0X445A46", variation: 60},
 ]
 
 
@@ -200,7 +200,7 @@ mountGuiToWindow(hwnd, guis) {
         gui.Opt("+Parent" hwnd)
         guiPos := gui.GetPos(&X, &Y)
         relX := X - windowX
-        relY := Y - windowY
+        relY := Y - windowY - 31
         mountedGuis.Push({Gui: gui, RelX: relX, RelY: relY, Hwnd: hwnd, Visibility: true})
     }
 
