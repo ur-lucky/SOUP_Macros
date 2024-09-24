@@ -20,7 +20,7 @@ global FOLDER_TREE := {
     }
 }
 
-global Version := "1.0.0"
+global Version := "1.0.1"
 ;global Menu_Version := major_version "." minor_version "." patch_version (label != "" ? "-" label : "")
 
 global GITHUB_API_URL := "https://api.github.com/repos/ur-lucky/SOUP_Macros/contents/"
@@ -537,7 +537,7 @@ RunButtonClicked() {
             "0x1032 0x4"
         ) {
             case "Yes":
-                newFile := RegExReplace(GetDependency(macroObj.path), 'Version\s*:=\s*"(.*?)"', 'Version := "' . macroObj.version . '"')
+                newFile := RegExReplace(GetDependency(macroObj.path), 'Version\s*:=\s*"(.*?)"', 'Version := "' . macroObj.version . '"',,1)
                 newPath := A_MyDocuments . "\SOUP_Macros\" . macroObj.path
                 macroObj.raw_file := newFile
                 macroObj.local_path := newPath
@@ -557,7 +557,7 @@ RunButtonClicked() {
             ) {
                 case "Yes":
                     FileDelete(macroObj.local_path)
-                    newFile := RegExReplace(GetDependency(macroObj.path), 'Version\s*:=\s*"(.*?)"', 'Version := "' . macroObj.version . '"')
+                    newFile := RegExReplace(GetDependency(macroObj.path), 'Version\s*:=\s*"(.*?)"', 'Version := "' . macroObj.version . '"',,1)
                     macroObj.raw_file := newFile
                     FileAppend(newFile, macroObj.local_path, "UTF-8-RAW")
                     MsgBox("Updated macro")
@@ -903,7 +903,7 @@ GetMacroInformation() {
         
             if (newVersion != currentVersion) {
                 FileDelete(THIS_FILE)
-                FileAppend(RegExReplace(UpdatedFile, 'Version\s*:=\s*"(.*?)"', 'Version := "' . newVersion . '"'), THIS_FILE, "UTF-8-RAW")
+                FileAppend(RegExReplace(UpdatedFile, 'Version\s*:=\s*"(.*?)"', 'Version := "' . newVersion . '"',,1), THIS_FILE, "UTF-8-RAW")
                 Run(THIS_FILE)
                 ExitApp
             }
