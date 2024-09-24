@@ -11,11 +11,11 @@
             "status": "Stable",
             "version": "1.0.3"
         },
-        "Pet Cube Lite.ahk": {
+        "Auto Catcher.ahk": {
             "name": "Pet Cube Lite",
-            "description": "Doesn't automatically move you to the required position",
+            "description": "Read discord for information",
             "status": "Stable",
-            "version": "1.0.1"
+            "version": "1.0.0"
         }
     }
 }
