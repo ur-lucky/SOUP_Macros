@@ -8,7 +8,7 @@ global MacroStatus := "Stable"
 global Version := "1.0.3"
 global Dependencies := [
     "Utils\UWBOCRLib.ahk","Utils\Functions.ahk","Utils\PS99Functions.ahk","Storage\PS99UI.ahk",
-    "Modules\Autofarm.ahk","Modules\MoveHumanoid.ahk","Modules\TeleportToWorld.ahk","Modules\TeleportToZone.ahk"
+    "Modules\Autofarm.ahk","Modules\MoveHumanoid.ahk","Modules\Reconnect.ahk","Modules\TeleportToWorld.ahk","Modules\TeleportToZone.ahk", "Modules\ValidateClan.ahk"
 ]
 
 #Include "%A_MyDocuments%\SOUP_Macros\Utils\UWBOCRLib.ahk"
@@ -18,8 +18,10 @@ global Dependencies := [
 
 #Include "%A_MyDocuments%\SOUP_Macros\Modules\Autofarm.ahk"
 #Include "%A_MyDocuments%\SOUP_Macros\Modules\MoveHumanoid.ahk"
+#Include "%A_MyDocuments%\SOUP_Macros\Modules\Reconnect.ahk"
 #Include "%A_MyDocuments%\SOUP_Macros\Modules\TeleportToWorld.ahk"
 #Include "%A_MyDocuments%\SOUP_Macros\Modules\TeleportToZone.ahk"
+#Include "%A_MyDocuments%\SOUP_Macros\Modules\ValidateClan.ahk"
 
 CoordMode "Pixel", "Client"
 CoordMode "Mouse", "Client"
@@ -144,6 +146,33 @@ IsBossChestAlive() {
     return not isDead
 }
 
+CheckNotification() {
+    if UIPixelSearch("Notification_Close") {
+        if UIPixelSearch("Notification_Oops") {
+            ; has blue bar on top
+            ; could be out of cubes or only able to use 1 kind
+            foundText := SearchNotificationWarningText()
+            if RegExMatch(foundText, "Use|use") > 0 {
+                ; choose the left side (Pet Cube)
+                return "Notification_Yes"
+            } else if RegExMatch(foundText, "catch|these|need") > 0 {
+                ; choose the left side (Pet Cube)
+                return "Notification_Ok"
+            }
+        } else {
+            ; is asking a question
+            ; most likely asking which pet cube to use
+            foundText := SearchNotificationQuestion()
+            if RegExMatch(foundText, "Which|which|catch") > 0 {
+                ; choose the left side (Pet Cube)
+                return "Notification_Yes"
+            }
+        }
+        return "Notification_Close"
+    }
+    return false
+}
+
 SetupCharacter() {
     TeleportToWorld("Teleport_World1")
     TeleportToWorld("Teleport_World3")
@@ -196,7 +225,20 @@ _RunAutoCatchMacro() {
         currentTick := A_TickCount
 
         ; initialization
-        SetupCharacter()
+
+        TeleportToWorld("Teleport_World1")
+        TeleportToWorld("Teleport_World3")
+
+        if not ValidateClan() {
+            continue
+        }
+
+
+        TeleportToZone("Elemental Realm")
+        SolveMovement(MovementMap["CatchPetsEvent"])
+
+        ;SetupCharacter()
+
         CurrentSessionStartTick := A_TickCount
         LastCatchPrompt := A_TickCount
 
@@ -211,6 +253,11 @@ _RunAutoCatchMacro() {
             ; -- search for green button
             ; # THIS COULD BE BAD - WORKING AS OF NOW
 
+            if IsUserDisconnected() {
+                ReconnectToRoblox()
+                UIPixelSearchLoop("HUD_Teleport_Button_Red", "HUD_Teleport_Button_Red")
+                break
+            }
 
             ; only need to check every 5 seconds
             if (A_TickCount - LastChestCheckTick > 5000) {
@@ -225,16 +272,19 @@ _RunAutoCatchMacro() {
             RandomMousePosition := RandomPositionInShape(ClickCoordinatesPolygon)
             SendEvent("{Click " RandomMousePosition.X " " RandomMousePosition.Y " 20}")
 
-            Sleep(10)
-
-            ; check for green button in notification menu (could be shitty)
-            if (UIPixelSearch("Notification_Yes", "Accept")[1]) {
-                UIClick("Notification_Yes")
-                LastCatchPrompt := A_TickCount
-                Sleep(750)
-            } else {
-                ;ExitMenus()
-                ;Sleep(300)
+            if UIPixelSearchLoop("Notification_Close", "Exit", 0)[1] {
+                buttonToClick := CheckNotification()
+                Debug("BUTTON TO CLICK: " buttonToClick)
+                if buttonToClick {
+                    if buttonToClick = "Notification_Yes" {
+                        UIClick(buttonToClick)
+                    } else if buttonToClick = "Notification_Ok" {
+                        UIClick(buttonToClick)
+                    } else {
+                        UIClick(buttonToClick)
+                    }
+                    LastCatchPrompt := A_TickCount
+                }
             }
 
             ; if you havnt caught something in 5 minutes, lowkey skill issue
