@@ -537,7 +537,7 @@ RunButtonClicked() {
             "0x1032 0x4"
         ) {
             case "Yes":
-                newFile := GetDependency(macroObj.path)
+                newFile := RegExReplace(GetDependency(macroObj.path), 'Version\s*:=\s*"(.*?)"', 'Version := "' . macroObj.version . '"')
                 newPath := A_MyDocuments . "\SOUP_Macros\" . macroObj.path
                 macroObj.raw_file := newFile
                 macroObj.local_path := newPath
@@ -549,6 +549,7 @@ RunButtonClicked() {
         }
     } else if macroObj.HasOwnProp("local_version") {
         if macroObj.version != macroObj.local_version {
+            OutputDebug("[DEBUG] Macro version out of date | Current: " macroObj.local_version " | New: " macroObj.version)
             switch MsgBox(
                 "Macro `"" macroObj.name "`" was updated `nWould you like to update?",
                 "SOUP Macros", 
@@ -556,7 +557,7 @@ RunButtonClicked() {
             ) {
                 case "Yes":
                     FileDelete(macroObj.local_path)
-                    newFile := GetDependency(macroObj.path)
+                    newFile := RegExReplace(GetDependency(macroObj.path), 'Version\s*:=\s*"(.*?)"', 'Version := "' . macroObj.version . '"')
                     macroObj.raw_file := newFile
                     FileAppend(newFile, macroObj.local_path, "UTF-8-RAW")
                     MsgBox("Updated macro")
