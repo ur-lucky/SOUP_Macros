@@ -1,6 +1,9 @@
 ﻿#Requires AutoHotkey v2.0
 #SingleInstance Force
 
+global Version := "1.0.0"
+global Dependencies := []
+
 CoordMode "Pixel", "Client"
 CoordMode "Mouse", "Client"
 
@@ -44,7 +47,7 @@ PixelSearchBuilder(Name := "") {
 ReconnectToRoblox() {
     ReconnectButton := ReconnectPositionMap["Reconnect_Button"]
     Loop {
-        if UserDisconnected() {
+        if IsUserDisconnected() {
             Loop {
                 Sleep(50)
                 SendEvent "{Click," ReconnectButton.Position[1] "," ReconnectButton.Position[2] "," 1 "}"
@@ -66,7 +69,7 @@ ReconnectToRoblox() {
     }
 }
 
-UserDisconnected() {
+IsUserDisconnected() {
     if (PixelSearchBuilder("Reconnect_Background") && PixelSearchBuilder("Reconnect_Button") && not PixelSearchBuilder("Escape_Button")) {
         return true
     }
@@ -74,7 +77,7 @@ UserDisconnected() {
 }
 
 ReconnectCheck() {
-    if (UserDisconnected()) {
+    if (IsUserDisconnected()) {
         ReconnectToRoblox()
     }
 }

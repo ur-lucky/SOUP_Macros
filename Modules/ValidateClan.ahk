@@ -30,7 +30,7 @@ OpenClanMenu() {
             Sleep(300)
             SendEvent "{F Down}{F Up}"
 
-            if not UIPixelSearchLoop("Clan_Button", "Clan_Button_Blue")[1] {
+            if not UIPixelSearchLoop("Clan_Button", "Clan_Button_Blue", 2000)[1] {
                 continue
             }
 
@@ -53,7 +53,7 @@ GetClanName(name := "SOUP") {
     width := Bounds2.X - Bounds1.X
     height := Bounds2.Y - Bounds1.Y
     ocrResult := OCR.FromRect(Bounds1.X, Bounds1.Y, width, height, "en-us", 1)
-
+    ExitMenus()
     if (RegExMatch(ocrResult.Text, name)) {
         return true
     }
@@ -62,6 +62,7 @@ GetClanName(name := "SOUP") {
 
 ValidateClan(clanName := "") {
     if OpenClanMenu() {
+        Sleep(500)
         x1 := 54
         y1 := 146
         x2 := 228
@@ -74,6 +75,7 @@ ValidateClan(clanName := "") {
 
         if (RegExMatch(ocrResult.Text, "Invites|invite|vite|ites")) {
         ;if (not HasNotificationOpen("Hatch|hatch|atch|hat|ha|ch|set|tin|tings")) {
+            ExitMenus()
             return false
         }
 
@@ -81,6 +83,8 @@ ValidateClan(clanName := "") {
             Sleep(500)
             return GetClanName(clanName)
         }
+        
+        ExitMenus()
         return true
     }
 }
