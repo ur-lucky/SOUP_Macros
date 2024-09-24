@@ -898,7 +898,7 @@ GetMacroInformation() {
             UpdatedFile := HTTPRequest.ResponseText
             THIS_FILE := A_ScriptFullPath
 
-            newVersion := config.Has("version") ? config["version"] : "1.0.0"
+            newVersion := mapObj.Has("version") ? mapObj["version"] : "1.0.0"
             currentVersion := ExtractText(FileRead(THIS_FILE), "Version")
         
             if (newVersion != currentVersion) {
