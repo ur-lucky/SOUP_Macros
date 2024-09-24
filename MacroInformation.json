@@ -13,9 +13,9 @@
         },
         "Auto Catcher.ahk": {
             "name": "Auto Catcher",
-            "description": "Read discord for information",
+            "description": "Read '#other' channel in discord for information",
             "status": "Stable",
-            "version": "1.0.0"
+            "version": "1.1.0"
         }
     }
 }

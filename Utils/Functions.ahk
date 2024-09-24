@@ -1,7 +1,7 @@
 ﻿#Requires AutoHotkey v2.0
 #SingleInstance Force
 
-global Version := "1"
+global Version := "1.0.0"
 global Dependencies := []
 
 CoordMode "Pixel", "Client"
@@ -95,6 +95,8 @@ DrawPolygon(points, showTime := 3000, color := "000000", d := 2, relative := fal
     } else if showTime < 0 {
         SetTimer(DrawDestroy.Bind(highlightGuis), -Abs(showTime))
     }
+
+    return highlightGuis
 }
 
 

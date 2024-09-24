@@ -1,6 +1,6 @@
 ﻿#Requires AutoHotkey v2.0
 
-global Version := "1"
+global Version := "1.0.0"
 global Dependencies := ["Utils\Functions.ahk", "Utils\UWBOCRLib.ahk", "Storage\PS99UI.ahk"]
 
 #Include "%A_MyDocuments%\SOUP_Macros\Utils\Functions.ahk"
@@ -172,11 +172,8 @@ HasMenuOpen(MenuName := "") {
     
     
     ocrResult := OCR.FromRect(Bounds1.X, Bounds1.Y, width, height, "en-us", 1) ;OCR.FromWindow("Roblox", "en-us", 1, 1)
-    DrawPolygon(BoundsToPolygon([{X: 68, Y: 82}, {X: 362, Y: 132}]), showTime := 1000)
+    ;DrawPolygon(BoundsToPolygon([{X: 68, Y: 82}, {X: 362, Y: 132}]), showTime := 1000)
     Debug("FOUND TEXT: " ocrResult.Text)
-
-    ; 0xFF1761
-    ; 0x84F710
 
     return RegExMatch(ocrResult.Text, MenuName) > 0
 }
@@ -195,13 +192,70 @@ HasNotificationOpen(MenuName := "") {
     
     
     ocrResult := OCR.FromRect(Bounds1.X, Bounds1.Y, width, height, "en-us", 1) ;OCR.FromWindow("Roblox", "en-us", 1, 1)
-    DrawPolygon(BoundsToPolygon([{X: x1-1, Y: y1-1}, {X: x2+1, Y: y2+1}]), showTime := 1000)
+    ;DrawPolygon(BoundsToPolygon([{X: x1-1, Y: y1-1}, {X: x2+1, Y: y2+1}]), showTime := 1000)
     Debug("FOUND TEXT: " ocrResult.Text)
 
-    ; 0xFF1761
-    ; 0x84F710
-
     return RegExMatch(ocrResult.Text, MenuName)
+}
+
+SearchNotificationWarning() {
+    x1 := 236
+    y1 := 118
+    x2 := 560
+    y2 := 164
+
+    Bounds1 := RelativeXYToAbsolute(x1,y1)
+    Bounds2 := RelativeXYToAbsolute(x2,y2)
+
+    width := Bounds2.X - Bounds1.X
+    height := Bounds2.Y - Bounds1.Y
+    
+    
+    ocrResult := OCR.FromRect(Bounds1.X, Bounds1.Y, width, height, "en-us", 1) ;OCR.FromWindow("Roblox", "en-us", 1, 1)
+    ;DrawPolygon(BoundsToPolygon([{X: x1-1, Y: y1-1}, {X: x2+1, Y: y2+1}]), showTime := 1000)
+    Debug("FOUND TEXT: " ocrResult.Text)
+
+    return ocrResult.Text
+}
+
+SearchNotificationWarningText() {
+    x1 := 176
+    y1 := 173
+    x2 := 619
+    y2 := 264
+
+    Bounds1 := RelativeXYToAbsolute(x1,y1)
+    Bounds2 := RelativeXYToAbsolute(x2,y2)
+
+    width := Bounds2.X - Bounds1.X
+    height := Bounds2.Y - Bounds1.Y
+    
+    
+    ocrResult := OCR.FromRect(Bounds1.X, Bounds1.Y, width, height, "en-us", 1) ;OCR.FromWindow("Roblox", "en-us", 1, 1)
+    ;DrawPolygon(BoundsToPolygon([{X: x1-1, Y: y1-1}, {X: x2+1, Y: y2+1}]), showTime := 1000)
+    Debug("FOUND TEXT: " ocrResult.Text)
+
+    return ocrResult.Text
+}
+
+SearchNotificationQuestion() {
+    x1 := 176
+    y1 := 145
+    x2 := 619
+    y2 := 217
+
+    Bounds1 := RelativeXYToAbsolute(x1,y1)
+    Bounds2 := RelativeXYToAbsolute(x2,y2)
+
+    width := Bounds2.X - Bounds1.X
+    height := Bounds2.Y - Bounds1.Y
+    
+    
+    ocrResult := OCR.FromRect(Bounds1.X, Bounds1.Y, width, height, "en-us", 1) ;OCR.FromWindow("Roblox", "en-us", 1, 1)
+    ;DrawPolygon(BoundsToPolygon([{X: x1-1, Y: y1-1}, {X: x2+1, Y: y2+1}]), showTime := 1000)
+    Debug("FOUND TEXT: " ocrResult.Text)
+
+    return ocrResult.Text
 }
 
 _FindOops() {
