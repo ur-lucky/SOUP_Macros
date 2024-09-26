@@ -383,6 +383,8 @@ Loop {
     Sleep(10)
 }
 
+MsgBox("F3 to start`nF5 to pause`nF8 to exit`n`ndont touch anything once you start")
+
 ToggleState(state := "") {
     global windows
     global initialized
@@ -423,5 +425,3 @@ F5:: {
 }
 
 F8::ExitApp()  ; Exit the application
-
-MsgBox("dont fucking touch anything`npress f3 to start f5 to pause f8 to exit")

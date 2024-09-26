@@ -1,6 +1,6 @@
 ﻿#Requires AutoHotkey v2.0
 
-global Version := "1.0.1"
+global Version := "1.0.2"
 global Dependencies := ["Utils\Functions.ahk", "Utils\UWBOCRLib.ahk", "Storage\PS99UI.ahk"]
 
 #Include "%A_MyDocuments%\SOUP_Macros\Utils\Functions.ahk"
@@ -274,7 +274,7 @@ SetCameraSensitivity() {
         Loop {
             SendInput("{Escape Down}{Escape Up}")
 
-            Sleep(300)
+            Sleep(1000)
 
             Bounds1 := RelativeXYToAbsolute(228,65)
             Bounds2 := RelativeXYToAbsolute(301,92)
