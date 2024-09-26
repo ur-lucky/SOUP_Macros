@@ -87,7 +87,7 @@ MovementMap["CatchPetsEvent"] := [
     {Key: "S", Duration: 300},
     {Rest: 1000},
     {Key: "Q"},
-    {Key: "WheelDown", Repeat: 15, Delay: 200}
+    {Key: "WheelDown", Repeat: 20, Delay: 100}
 ]
 
 
@@ -229,6 +229,7 @@ CustomPixelSearchAndHandlePets(window) {
                             UIClick(buttonToClick)
                             return true
                         }
+                        window.LastCatchPrompt := A_TickCount
                     }
                 }
             }
