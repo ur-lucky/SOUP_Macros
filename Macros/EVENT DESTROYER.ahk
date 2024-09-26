@@ -49,8 +49,8 @@ global colorsToSearch := [
 MovementMap["PositionCamera"] := [
     {Key:"Camera", Direction: "X", Degrees: 90},
     {Key:"Camera", Direction: "Y", Degrees: 90},
-    {Key: "WheelDown", Repeat: 15, Delay: 100}
-    {Rest: 1000}
+    {Key: "WheelDown", Repeat: 15, Delay: 100},
+    {Rest: 1000},
     {Key: "WheelDown", Repeat: 5, Delay: 100}
 ]
 
