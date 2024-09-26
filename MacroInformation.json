@@ -5,9 +5,9 @@
     },
 
     "Macros": {
-        "EVENT DESTROYER.ahk": {
-            "name": "EVENT DESTROYER",
-            "description": "BOTH MACROS IN ONE",
+        "EVENT R.ahk": {
+            "name": "EVENT R",
+            "description": "R MACROS IN ONE",
             "status": "Unstable",
             "version": "1.0.0e"
         },
@@ -15,7 +15,7 @@
             "name": "Pet Cube",
             "description": "F3 Start\nF5 Pause\nF8 Exit",
             "status": "Stable",
-            "version": "1.1.0b"
+            "version": "1.1.0c"
         },
         "Auto Catcher.ahk": {
             "name": "Auto Catcher",
