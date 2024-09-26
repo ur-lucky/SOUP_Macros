@@ -498,28 +498,34 @@ MacroButtonClicked(ButtonNumber) {
 
     MainGui_MacroInfo_MacroLastUpdate.Text := macroObj.last_updated
 
-    if macroObj.initial_fetch_complete {
-        MainGui_MacroInfo_RunMacro.Enabled := true
-        MainGui_MacroInfo_RunMacro.Text := "Run Macro"
-    } else {
-        MainGui_MacroInfo_RunMacro.Enabled := false
-        MainGui_MacroInfo_RunMacro.Text := "[Fetching...]"
-    }
-
     for _, uiElement in MainGui_MacroInfoArray {
         uiElement.Visible := true
     }
 
-    ;if RegExMatch(macroObj.LastUpdated, "Fetch|Failed") > 0 {
-    if not macroObj.initial_fetch_complete {
-        MainGui_MacroInfo_MacroLastUpdate.Text := "[Fetching...]"
-        GetExtraMacroInformation(macroObj)  ; Fetch the data if not already fetched
-        if (CurrentPage = PageWhenButtonClicked) and (MacroButtonSelected = ButtonNumber) {
-            MainGui_MacroInfo_MacroLastUpdate.Text := macroObj.last_updated
-            MainGui_MacroInfo_RunMacro.Text := "Run Macro"
+    if !macroObj.HasOwnProp("is_custom") {
+        if macroObj.initial_fetch_complete {
             MainGui_MacroInfo_RunMacro.Enabled := true
+            MainGui_MacroInfo_RunMacro.Text := "Run Macro"
+        } else {
+            MainGui_MacroInfo_RunMacro.Enabled := false
+            MainGui_MacroInfo_RunMacro.Text := "[Fetching...]"
         }
-        ;MainGui_MacroInfo_RunMacro.Text := "Run"
+
+
+        ;if RegExMatch(macroObj.LastUpdated, "Fetch|Failed") > 0 {
+        if not macroObj.initial_fetch_complete {
+            MainGui_MacroInfo_MacroLastUpdate.Text := "[Fetching...]"
+            GetExtraMacroInformation(macroObj)  ; Fetch the data if not already fetched
+            if (CurrentPage = PageWhenButtonClicked) and (MacroButtonSelected = ButtonNumber) {
+                MainGui_MacroInfo_MacroLastUpdate.Text := macroObj.last_updated
+                MainGui_MacroInfo_RunMacro.Text := "Run Macro"
+                MainGui_MacroInfo_RunMacro.Enabled := true
+            }
+            ;MainGui_MacroInfo_RunMacro.Text := "Run"
+        }
+    } else {
+        MainGui_MacroInfo_RunMacro.Enabled := true
+        MainGui_MacroInfo_RunMacro.Text := "Run Macro"
     }
 }
 
@@ -547,7 +553,7 @@ RunButtonClicked() {
             case "No":
                 return
         }
-    } else if macroObj.HasOwnProp("local_version") {
+    } else if macroObj.HasOwnProp("local_version") && !macroObj.HasOwnProp("is_custom") {
         if macroObj.version != macroObj.local_version {
             OutputDebug("[DEBUG] Macro version out of date | Current: " macroObj.local_version " | New: " macroObj.version)
             switch MsgBox(
@@ -853,6 +859,8 @@ GetMacroInformation() {
     
     Request_JSON := Jxon_Load(&response)
 
+    downloadedLocalMacros := []
+
     for mapName, mapObj in Request_JSON {
         if mapName = "Macros" {
             for key, config in mapObj {
@@ -875,6 +883,8 @@ GetMacroInformation() {
                         newArgMap.filename := LocalMacro.filename
                         newArgMap.local_path := LocalMacro.path
                         newArgMap.raw_file := LocalMacro.raw_file
+
+                        LocalMacros.Delete(key)
                     } else {
                         newArgMap.name := config.Has("name") ? config["name"] : key
                         newArgMap.filename := GitubMacroInfo.name
@@ -909,6 +919,26 @@ GetMacroInformation() {
             }
         }
     }
+
+    for index, obj in LocalMacros {
+        newArgMap := {}
+                    
+        OutputDebug("[DEBUG] Found local file " LocalMacro.name)
+
+        newArgMap.name := obj.name
+        newArgMap.description := "CUSTOM MACRO"
+        newArgMap.status := "Unknown"
+        newArgMap.version := ""
+        
+        newArgMap.local_version := obj.version
+        newArgMap.filename := obj.filename
+        newArgMap.local_path := obj.path
+        newArgMap.path  := obj.path
+        newArgMap.raw_file := obj.raw_file
+        newArgMap.is_custom := true
+
+        CreateMacroObject(newArgMap)
+    }
 }
 
 GetLocalMacros() {
@@ -926,7 +956,7 @@ GetLocalMacros() {
                 version: CurrentVersion,
                 filename: A_LoopFileName,
                 path: filePath,
-                raw_file: FileRead(filePath)
+                raw_file: FileRead(filePath),
             }
             
             

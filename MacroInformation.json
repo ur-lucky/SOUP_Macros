@@ -5,6 +5,12 @@
     },
 
     "Macros": {
+        "EVENT DESTROYER.ahk": {
+            "name": "EVENT DESTROYER",
+            "description": "BOTH MACROS IN ONE",
+            "status": "Unstable",
+            "version": "1.0.0"
+        },
         "Pet Cube.ahk": {
             "name": "Pet Cube",
             "description": "F3 Start\nF5 Pause\nF8 Exit",

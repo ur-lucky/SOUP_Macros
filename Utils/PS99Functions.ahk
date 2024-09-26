@@ -1,6 +1,6 @@
 ﻿#Requires AutoHotkey v2.0
 
-global Version := "1.0.0"
+global Version := "1.0.1"
 global Dependencies := ["Utils\Functions.ahk", "Utils\UWBOCRLib.ahk", "Storage\PS99UI.ahk"]
 
 #Include "%A_MyDocuments%\SOUP_Macros\Utils\Functions.ahk"
@@ -11,9 +11,6 @@ CoordMode "Pixel", "Client"
 CoordMode "Mouse", "Client"
 SetMouseDelay -1
 
-_GetRawUIData() {
-
-}
 
 _GetUIPosition(Name := "") {
     PositionBuilder := {X: 0, Y: 0}
@@ -270,4 +267,154 @@ _FindOops() {
     ocrResult := OCR.FromRect(Bounds1.X, Bounds1.Y, width, height, "en-us", 1)
 
     return RegExMatch(ocrResult.Text, "Oops|oops|oo|ps") > 0
+}
+
+SetCameraSensitivity() {
+    Loop {
+        Loop {
+            SendInput("{Escape Down}{Escape Up}")
+
+            Sleep(300)
+
+            Bounds1 := RelativeXYToAbsolute(228,65)
+            Bounds2 := RelativeXYToAbsolute(301,92)
+            width := Bounds2.X - Bounds1.X
+            height := Bounds2.Y - Bounds1.Y
+            ocrResult := OCR.FromRect(Bounds1.X, Bounds1.Y, width, height, "en-us", 1)
+
+            if RegExMatch(ocrResult.Text, "Settings|Setting|etting|ing|ett") > 0 {
+
+                SendEvent("{Click 270 78}")
+                OutputDebug("[DEBUG] FOUND SETTINGS")
+                break
+            }
+        }
+
+        MouseMove(760, 300, 0)
+        SendEvent("{Click 760, 300}")
+        Success := false
+
+        Loop {
+            Bounds1 := RelativeXYToAbsolute(16,115)
+            Bounds2 := RelativeXYToAbsolute(318,470)
+            width := Bounds2.X - Bounds1.X
+            height := Bounds2.Y - Bounds1.Y
+            ocrResult := OCR.FromRect(Bounds1.X, Bounds1.Y, width, height, "en-us", 1)
+
+            SettingsMap := Map()
+
+            for line in ocrResult.Lines {
+                ;if word.Text == "Keybinds" {
+                    lineWidth := 0
+                    lineHeight := line.Words[1].h
+                    lineX := line.Words[1].x
+                    lineY := line.Words[1].y
+                    for word in line.Words {
+                        lineWidth += word.w
+                    }
+        
+                    absoluteX := width + lineX
+                    absoluteY := height + lineY
+        
+                    OutputDebug("[DEBUG] FOUND " line.Text)
+
+                    SettingsMap[line.Text] := {YPosition: 115 + lineY}
+                ;}
+            }
+
+            if (SettingsMap.Has("Camera Sensitivity")) {
+                OutputDebug("[DEBUG] FOUND CAMERA SENS")
+                SendEvent("{Click 750," SettingsMap["Camera Sensitivity"].YPosition "}")
+                Sleep(200)
+                SendText("0.12")
+                Sleep(200)
+                SendInput("{Enter Down}{Enter Up}")
+                Sleep(200)
+                Success := true
+                break
+            } else {
+                SendInput("{WheelDown}")
+            }
+            Sleep(1000)
+        }
+        SendInput("{Escape Down}{Escape Up}")
+        if Success {
+            break
+        }
+    }
+}
+
+DllCaller(X := 0, Y := 0) {
+    DllCall("mouse_event", "UInt", 0x0001, "Int", X, "Int", Y, "UInt", 0, "UPtr", 0)
+}
+
+TurnCameraX(degrees) {
+    isnegative := false
+    if degrees < 0 {
+        isnegative := true
+        degrees *= -1
+    }
+    newPi := 6000
+    units := (degrees * newPi) / 360  ; Total units to move
+    OutputDebug("[DEBUG] Total Units: " units)
+
+    StepSize := 100  ; Interval of 10 units per step
+    Steps := units / StepSize  ; Calculate how many steps are needed
+
+    ; Loop for each step to move the camera
+    Loop Floor(Steps) {
+        realStep := StepSize
+        if isnegative {
+            realStep *= -1
+        }
+        DllCaller(realStep, 0)  ; Move by 10 units
+        Sleep(10)  ; Small delay to smooth movement
+    }
+    
+    ; Handle any remaining distance that doesn't fit perfectly into the steps
+    RemainingUnits := Mod(units, StepSize)
+    if (RemainingUnits > 0) {
+        realUnit := RemainingUnits
+        if isnegative {
+            realUnit *= -1
+        }
+
+        OutputDebug("[DEBUG] MOVING BY: " realUnit)
+
+        DllCaller(realUnit, 0)  ; Move any remaining units
+    }
+}
+
+TurnCameraY(degrees) {
+    isnegative := false
+    if degrees < 0 {
+        degrees *= -1
+        isnegative := true
+    }
+    newPi := 6000
+    units := (degrees * newPi) / 360  ; Total units to move
+    OutputDebug("[DEBUG] Total Units: " units)
+
+    StepSize := 100  ; Interval of 10 units per step
+    Steps := units / StepSize  ; Calculate how many steps are needed
+
+    ; Loop for each step to move the camera
+    Loop Floor(Steps) {
+        realStep := StepSize
+        if isnegative {
+            realStep *= -1
+        }
+        DllCaller(0, realStep)  ; Move by 10 units
+        Sleep(10)  ; Small delay to smooth movement
+    }
+    
+    ; Handle any remaining distance that doesn't fit perfectly into the steps
+    RemainingUnits := Mod(units, StepSize)
+    if (RemainingUnits > 0) {
+        realUnit := RemainingUnits
+        if isnegative {
+            realUnit *= -1
+        }
+        DllCaller(0, realUnit)  ; Move any remaining units
+    }
 }

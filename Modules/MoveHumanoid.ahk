@@ -1,10 +1,14 @@
 #Requires AutoHotkey v2.0
 #SingleInstance Force
 
-global Version := "1"
+global Version := "1.0.0"
 global Dependencies := ["Utils\Functions.ahk"]
 
 #Include "%A_MyDocuments%\SOUP_Macros\Utils\Functions.ahk"
+
+CoordMode "Pixel", "Client"
+CoordMode "Mouse", "Client"
+SetMouseDelay -1
 
 SolveMovement(MovementMap) {
     KeyPresses := []  ; Array to store key presses and their timings
@@ -14,8 +18,20 @@ SolveMovement(MovementMap) {
     ; First pass: Cache all actions with their respective time markers
     for action in MovementMap {
         if (action.HasOwnProp("Key")) {
+            ; Handle camera movements based on "Camera" action
+            if (action.Key = "Camera") {
+                if (action.HasOwnProp("Direction") && action.HasOwnProp("Degrees")) {
+                    ; Cache camera turn based on direction and degrees
+                    Markers.Push({
+                        Direction: action.Direction, 
+                        Degrees: action.Degrees, 
+                        Time: CurrentTime, 
+                        Action: "TurnCamera", 
+                        Processed: false
+                    })
+                }
             ; Handle Wheel scroll support with repeat
-            if (action.Key = "WheelUp" || action.Key = "WheelDown") {
+            } else if (action.Key = "WheelUp" || action.Key = "WheelDown") {
                 if (action.HasOwnProp("Repeat")) {
                     RepeatTimes := action.Repeat
                     Loop RepeatTimes {
@@ -80,6 +96,36 @@ SolveMovement(MovementMap) {
                     SendEvent "{" marker.Key "}"
                 } else if (marker.Action = "Down" || marker.Action = "Up") {
                     SendEvent "{" marker.Key " " marker.Action "}"
+                } else if (marker.Action = "TurnCamera") {
+                    ; Handle camera turns
+                    if (marker.Direction = "X") {
+                        CoordMode "Mouse", "Window"
+                        WinGetPos(&somex, &somey, &width, &height, "A")
+                        MouseMove(width/2, height/2, 0)
+                        Sleep(10)
+                        SendEvent("{Click Right Down Relative}")
+                        Sleep(50)
+                        ;MouseMove(0, 0, 0, "R")
+                        DllCaller(1,0)
+                        DllCaller(-1,0)
+                        TurnCameraX(marker.Degrees)
+                        SendEvent("{Click Right Up}")
+                        CoordMode "Mouse", "Client"
+                    } else if (marker.Direction = "Y") {
+                        CoordMode "Mouse", "Window"
+                        WinGetPos(&somex, &somey, &width, &height, "A")
+                        MouseMove(width/2, height/2, 0)
+                        Sleep(10)
+                        SendEvent("{Click Right Down Relative}")
+                        Sleep(50)
+                        ;MouseMove(0, 0, 0, "R")
+                        DllCaller(0,1)
+                        DllCaller(0,-1)
+                        TurnCameraY(marker.Degrees)
+                        SendEvent("{Click Right Up}")
+                        CoordMode "Mouse", "Client"
+
+                    }
                 } else if (marker.Action = "RunFunc") {
                     ; Execute the function and measure its duration
                     funcStart := A_TickCount

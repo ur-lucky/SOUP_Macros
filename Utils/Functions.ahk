@@ -1,7 +1,7 @@
 ﻿#Requires AutoHotkey v2.0
 #SingleInstance Force
 
-global Version := "1.0.0"
+global Version := "1.0.2"
 global Dependencies := []
 
 CoordMode "Pixel", "Client"

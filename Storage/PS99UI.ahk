@@ -1,6 +1,6 @@
 ﻿#Requires AutoHotkey v2.0
 
-global Version := "1.0.5"
+global Version := "1.0.6"
 global Dependencies := []
 
 global PS99_UI_POSITION_MAP := Map()
@@ -40,13 +40,15 @@ PS99_UI_COLOR_MAP["Search"] := {Color: "0xAFAFAF", Variation: 5}
 ; Clan related
 PS99_UI_COLOR_MAP["Clan_Button_Blue"] := {Color: "0x077FDF", Variation: 5}
 
-
-
 ; Teleport menu
 PS99_UI_COLOR_MAP["Teleport_Spawn"] := {Color: "0xFCAE03", Variation: 5}
 PS99_UI_COLOR_MAP["Teleport_World1"] := {Color: "0x5CBCF4", Variation: 5}
 PS99_UI_COLOR_MAP["Teleport_World2"] := {Color: "0xDE54FF", Variation: 5}
 PS99_UI_COLOR_MAP["Teleport_World3"] := {Color: "0x02DAEA", Variation: 5}
+
+PS99_UI_COLOR_MAP["Ultiamte_Red"] := {Color: "0xFF1C1C", Variation: 1}
+PS99_UI_COLOR_MAP["Ultiamte_Blue"] := {Color: "0x70EDFC", Variation: 1}
+
 
 
 
@@ -113,3 +115,5 @@ PS99_UI_POSITION_MAP["Teleport_World3"] := {Position: {X: 23, Y: 330}, Bounds: [
 PS99_UI_POSITION_MAP["HatchSettings_Autohatch_Toggle"] := {Position: {X: 523, Y: 193}, Bounds: [{X: 450, Y: 170},{X: 592, Y: 215}]}
 PS99_UI_POSITION_MAP["HatchSettings_ChargedEggs_Toggle"] := {Position: {X: 523, Y: 295}, Bounds: [{X: 450, Y: 272},{X: 592, Y: 318}]}
 PS99_UI_POSITION_MAP["HatchSettings_GoldenEggs_Toggle"] := {Position: {X: 523, Y: 398}, Bounds: [{X: 450, Y: 376},{X: 592, Y: 422}]}
+
+PS99_UI_POSITION_MAP["Ultimate_Check"] := {Position: {X: 235, Y: 479}, Bounds: [{X: 235, Y: 479},{X: 246, Y: 485}]}

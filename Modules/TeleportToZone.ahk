@@ -1,7 +1,7 @@
 ﻿#Requires AutoHotkey v2.0
 #SingleInstance Force
 
-global Version := "1"
+global Version := "1.0.1"
 global Dependencies := ["Utils\Functions.ahk","Utils\PS99Functions.ahk","Storage\PS99UI.ahk"]
 
 #Include "%A_MyDocuments%\SOUP_Macros\Utils\Functions.ahk"
@@ -20,15 +20,17 @@ TeleportToZone(ZoneName := "", SleepDuration := 7000) {
         ExitMenus()
         Sleep(200)
 
-        FoundTeleportButton := UIPixelSearchLoop("HUD_Teleport_Button_Red", "HUD_Teleport_Button_Red")
+        FoundTeleportButton := UIPixelSearchLoop("HUD_Teleport_Button_Red", "HUD_Teleport_Button_Red")[1]
         if (not FoundTeleportButton) {
+            Debug("DIDNT FIND TELEPORT BUTTON")
             continue
         }
 
         UIClick("HUD_Teleport_Button")
 
-        TeleportMenuIsOpen := UIPixelSearchLoop("Teleport_World2")
+        TeleportMenuIsOpen := UIPixelSearchLoop("Teleport_World2")[1]
         if (not TeleportMenuIsOpen) {
+            Debug("DIDNT FIND SPAWN WORLD")
             continue
         }
 

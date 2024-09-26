@@ -1,7 +1,7 @@
 #Requires AutoHotkey v2.0
 #SingleInstance Force
 
-global Version := "1"
+global Version := "1.0.0"
 global Dependencies := ["Utils\Functions.ahk", "Utils\UWBOCRLib.ahk", "Utils\PS99Functions.ahk","Storage\PS99UI.ahk"]
 
 #Include "%A_MyDocuments%\SOUP_Macros\Utils\Functions.ahk"

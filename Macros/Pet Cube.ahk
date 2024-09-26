@@ -5,7 +5,7 @@ global MacroName := "Pet Cube"
 global MacroDescription := "Automatically break boss chest and capture pets"
 global MacroStatus := "Stable"
 
-global Version := "1.0.3"
+global Version := "1.1.0"
 global Dependencies := [
     "Utils\UWBOCRLib.ahk","Utils\Functions.ahk","Utils\PS99Functions.ahk","Storage\PS99UI.ahk",
     "Modules\Autofarm.ahk","Modules\MoveHumanoid.ahk","Modules\Reconnect.ahk","Modules\TeleportToWorld.ahk","Modules\TeleportToZone.ahk", "Modules\ValidateClan.ahk"
@@ -30,6 +30,10 @@ SetMouseDelay -1
 global isRunning := false
 global ClickCoordinatesPolygon := [{X: 525, Y: 239}, {X: 760, Y: 239}, {X: 678, Y: 315}]
 global MovementMap := Map()
+
+global mountedGuis := []
+global focusDebounce := 250
+global windows := []
 
 MovementMap["CatchPetsEvent"] := [
     {Key: "Q"},
@@ -195,21 +199,95 @@ SetupCharacter() {
 ; OLD COORDS
 ; {X: 760, Y: 370}
 
+UpdateGuiPositions() {
+    global mountedGuis, focusDebounce
+
+    for mountedGui in mountedGuis {
+        ; Find the associated window for the current GUI
+        associatedWindow := false
+        for window in windows {
+            if window.Hwnd = mountedGui.Hwnd {
+                associatedWindow := window
+                break
+            }
+        }
+
+        if WinActive("ahk_class AutoHotkeyGUI") {
+            continue
+        }
+
+        ; Check if the window is active and not running
+        if WinActive("ahk_id " mountedGui.Hwnd) && not associatedWindow.IsRunning {
+            ; Debounce logic: Ensure the window has been active for at least focusDebounce ms
+            if (!associatedWindow.LastFocusTime || (A_TickCount - associatedWindow.LastFocusTime) >= focusDebounce) {
+                if not mountedGui.Visibility {  ; Show the GUI only if it's currently hidden
+                    mountedGui.Gui.Show()
+                    mountedGui.Visibility := true
+                }
+
+                newX := mountedGui.RelX
+                newY := mountedGui.RelY
+                mountedGui.Gui.Move(newX, newY)
+            }
+        } else {
+            ; Hide the GUI only if it's currently visible
+            if mountedGui.Visibility {
+                mountedGui.Gui.Hide()
+                mountedGui.Visibility := false
+            }
+
+            ; If window becomes active, record the activation time
+            if WinActive("ahk_id " mountedGui.Hwnd) {
+                associatedWindow.LastFocusTime := A_TickCount
+            }
+        }
+    }
+}
+
+mountGuiToWindow(hwnd, guis) {
+    ; Get initial window R
+    WinGetPos(&windowX, &windowY,,, "ahk_id " hwnd)
+
+    ; For each GUI, calculate its relative position to the window's current position
+    for gui in guis {
+        ; Get the GUI's current position
+        gui.Opt("+Parent" hwnd)
+        guiPos := gui.GetPos(&X, &Y)
+        relX := X - windowX
+        relY := Y - windowY - 31
+        mountedGuis.Push({Gui: gui, RelX: relX, RelY: relY, Hwnd: hwnd, Visibility: true})
+    }
+
+    ; Start a timer to continuously track the window's position and update the GUIs
+    SetTimer(UpdateGuiPositions, 50)
+}
+
 
 _RunAutoCatchMacro() {
-    WinMove(,,816,638,"A")
-
+    
     global isRunning
     Debug("MACRO FUNCTION CALLED")
-
+    
     if (isRunning) {
         Debug("MACRO ALREADY RUNNING")
         return
     }
-
+    
     isRunning := true
+    hwnd := WinGetID("A")
+    WinMove(,,816,638,"ahk_id" hwnd)
 
-    DrawPolygon(ClickCoordinatesPolygon, 0, "ff0000", 2, true)
+    windows.Push({
+        Hwnd: hwnd, 
+        LastChestCheckTick: A_TickCount,
+        LastPetCaught: A_TickCount,
+        OutOfCubesTick: 0,
+        IsRunning: false,
+        LastFocusTime: 0  ; Initialize LastFocusTime
+    })
+
+    guis := DrawPolygon(ClickCoordinatesPolygon, 0, "ff0000", 2, true)
+    mountGuiToWindow(hwnd, guis)
 
     currentTick := A_TickCount
 
@@ -226,8 +304,8 @@ _RunAutoCatchMacro() {
 
         ; initialization
 
-        TeleportToWorld("Teleport_World1")
-        TeleportToWorld("Teleport_World3")
+        ;TeleportToWorld("Teleport_World1")
+        ;TeleportToWorld("Teleport_World3")
 
         if not ValidateClan() {
             continue
@@ -260,7 +338,7 @@ _RunAutoCatchMacro() {
             }
 
             ; only need to check every 5 seconds
-            if (A_TickCount - LastChestCheckTick > 5000) {
+            if (A_TickCount - LastChestCheckTick > 1000) {
                 if (IsBossChestAlive()) {
                     ; don't need to do a pixel search or check for time
                     SendEvent("{R Down}{R Up}")
@@ -269,8 +347,11 @@ _RunAutoCatchMacro() {
             }
 
             ; click on random position inside polygon
-            RandomMousePosition := RandomPositionInShape(ClickCoordinatesPolygon)
-            SendEvent("{Click " RandomMousePosition.X " " RandomMousePosition.Y " 20}")
+
+            Loop 3 {
+                RandomMousePosition := RandomPositionInShape(ClickCoordinatesPolygon)
+                SendEvent("{Click " RandomMousePosition.X " " RandomMousePosition.Y " 2}")
+            }
 
             if UIPixelSearchLoop("Notification_Close", "Exit", 0)[1] {
                 buttonToClick := CheckNotification()
@@ -293,12 +374,116 @@ _RunAutoCatchMacro() {
                 break
             }
 
-            if (A_TickCount - CurrentSessionStartTick > one_hour) {
+            if (A_TickCount - CurrentSessionStartTick > (one_hour * 2)) {
                 ; escape loop to "rejoin"
                 break
             }
-
+            Sleep(10)
         }
+    }
+}
+
+
+
+robloxInstanceHwnd := WinGetID("ahk_exe RobloxPlayerBeta.exe")
+WinActivate("ahk_id" robloxInstanceHwnd)
+WinMove(,,816, 638, "ahk_id" robloxInstanceHwnd)
+WinWaitActive("ahk_id" robloxInstanceHwnd)
+
+guis := DrawPolygon(ClickCoordinatesPolygon, 0, "ff0000", 2, true)
+mountGuiToWindow(robloxInstanceHwnd, guis)
+
+global one_hour := 60 * 60 * 1000
+
+Loop {
+    TeleportToWorld("Teleport_World1")
+    TeleportToWorld("Teleport_World3")
+
+    if not ValidateClan() {
+        continue
+    }
+
+    TeleportToZone("Elemental Realm")
+    SolveMovement(MovementMap["CatchPetsEvent"])
+
+    CurrentSessionStartTick := A_TickCount
+    LastPetCaught := A_TickCount
+    LastChestCheckTick := A_TickCount
+    OutOfCubesTick := 0
+
+    ; main loop - this can be broken if something is just not working
+    Loop {
+        ; go by order of priority
+        ; 1. Boss Chest
+        ; --Check if chest is alive
+        ; -- Attempt to use ultimate
+        ; 2. Click on random position
+        ; 3. Check for notication menu
+        ; -- search for green button
+        ; # THIS COULD BE BAD - WORKING AS OF NOW
+
+        if IsUserDisconnected() {
+            ReconnectToRoblox()
+            UIPixelSearchLoop("HUD_Teleport_Button_Red", "HUD_Teleport_Button_Red")
+            break
+        }
+
+        ; only need to check every 5 seconds
+        if (A_TickCount - LastChestCheckTick > 1000) {
+            if (IsBossChestAlive()) {
+                ; don't need to do a pixel search or check for time
+                SendEvent("{R Down}{R Up}")
+            } 
+            LastChestCheckTick := A_TickCount
+        }
+
+        if (A_TickCount - LastPetCaught > 300000) {
+            ; if the player doesnt catch a pet within 5 minutes, rejoin
+            ; escape loop to "rejoin"
+            break
+        }
+
+        if (A_TickCount - CurrentSessionStartTick > (one_hour * 2)) {
+            ; rejoin every 2 hours to prevent lag
+            ; escape loop to "rejoin"
+            break
+        }
+
+        ; click on random position inside polygon
+
+        Loop 3 {
+            RandomMousePosition := RandomPositionInShape(ClickCoordinatesPolygon)
+            SendEvent("{Click " RandomMousePosition.X " " RandomMousePosition.Y " 2}")
+        }
+
+        if UIPixelSearchLoop("Notification_Close", "Exit", 0)[1] {
+            buttonToClick := CheckNotification()
+            Debug("BUTTON TO CLICK: " buttonToClick)
+            if buttonToClick {
+                if buttonToClick = "Notification_Yes" {
+                    UIClick(buttonToClick)
+                    LastPetCaught := A_TickCount
+                } else if buttonToClick = "Notification_Ok" {
+                    UIClick(buttonToClick)
+                    OutOfCubesTick := A_TickCount
+                } else {
+                    UIClick(buttonToClick)
+                }
+            }
+        }
+
+        ; if you havnt caught something in 5 minutes, lowkey skill issue
+        Sleep(10)
+    }
+}
+
+ToggleState(state := "") {
+    global windows
+    for window in windows {
+        if not state {
+            state := !window.IsRunning
+        }
+        window.IsRunning := state
     }
 }
 
