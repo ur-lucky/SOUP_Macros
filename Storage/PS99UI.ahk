@@ -116,4 +116,4 @@ PS99_UI_POSITION_MAP["HatchSettings_Autohatch_Toggle"] := {Position: {X: 523, Y:
 PS99_UI_POSITION_MAP["HatchSettings_ChargedEggs_Toggle"] := {Position: {X: 523, Y: 295}, Bounds: [{X: 450, Y: 272},{X: 592, Y: 318}]}
 PS99_UI_POSITION_MAP["HatchSettings_GoldenEggs_Toggle"] := {Position: {X: 523, Y: 398}, Bounds: [{X: 450, Y: 376},{X: 592, Y: 422}]}
 
-PS99_UI_POSITION_MAP["Ultimate_Check"] := {Position: {X: 235, Y: 479}, Bounds: [{X: 235, Y: 479},{X: 246, Y: 485}]}
+PS99_UI_POSITION_MAP["Ultimate_Check"] := {Position: {X: 235, Y: 479}, Bounds: [{X: 230, Y: 475},{X: 250, Y: 489}]}

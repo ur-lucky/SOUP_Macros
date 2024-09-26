@@ -381,8 +381,16 @@ Loop {
 
             ; Check for boss chest every 1000 ms
             if (A_TickCount - window.LastChestCheckTick > 1000) {
-                if (IsBossChestAlive() && UIPixelSearch("Ultimate_Check", "Ultimate_Blue")[1]) {
-                    DoBossChest()
+                ;DrawPolygonOnUI("Ultimate_Check", 1000)
+                ;SuccessfulUltiCheck := UIPixelSearch("Ultimate_Check", "Ultimate_Blue")[1]
+                ;SuccessfulUtliCheck2 := PixelSearch(&QIOQDHQOI, &doiqbdwoiqb, 267, 477, 280, 492, "0xFFFFFF", 0)
+                ITSALIVE := IsBossChestAlive()
+
+                ;Debug("Chest: " TrueFalseToString(ITSALIVE) " | Ultimate: " TrueFalseToString(SuccessfulUltiCheck) " | Ultimate: " TrueFalseToString(SuccessfulUtliCheck2))
+
+                if (ITSALIVE) {
+                    ;DoBossChest()
+                    SendEvent("{R Down}{R Up}")
                 } 
                 window.LastChestCheckTick := A_TickCount
             }
