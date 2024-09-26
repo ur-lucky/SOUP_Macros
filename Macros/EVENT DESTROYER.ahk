@@ -58,9 +58,9 @@ MovementMap["CatchingArea"] := [
     {Key: "Q"},
     {Rest: 100},
     {Key: "W", Duration: 1375},
-    {Rest: 800},
-    {Func: EnableAutofarm},
     {Rest: 500},
+    {Func: EnableAutofarm},
+    {Rest: 800},
     {Key: "Q"},
 
 ]
@@ -233,6 +233,7 @@ CustomPixelSearchAndHandlePets(window) {
                             UIClick(buttonToClick)
                             return true
                         }
+                        window.LastCatchPrompt := A_TickCount
                     }
                 }
             }
