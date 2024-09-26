@@ -362,6 +362,8 @@ Loop {
                 ResetCharacter()
                 window.IsPositioned := true
                 window.CurrentSessionStartTick := A_TickCount
+                window.LastCatchPrompt := A_TickCount
+                window.LastPetCaught := A_TickCount
             }
             ; Activate the window
 
@@ -372,7 +374,7 @@ Loop {
                 continue
             }
             
-            if (A_TickCount - window.LastCatchPrompt >= 300000) {
+            if (A_TickCount - window.LastCatchPrompt >= 120000 && A_TickCount - window.OutOfCubesTick >=  120000) {
                 window.IsPositioned := false
                 continue
             }

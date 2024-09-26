@@ -388,12 +388,12 @@ ProcessDependencies(rawFileContent) {
         
         if FileExist(localPath) {
             CurrentFile := FileRead(localPath)
-            VersionCheckResults := VersionCheck(CurrentFile, rawDependency)
-            if (VersionCheckResults.Changed) {
-                OutputDebug("[DEPENDENCY] VERSION CHANGED FOR DEPENDENCY | " dependencyName " | " VersionCheckResults.New " | " VersionCheckResults.Old)
+            ;VersionCheckResults := VersionCheck(CurrentFile, rawDependency)
+            ;if (VersionCheckResults.Changed) {
+                ;OutputDebug("[DEPENDENCY] VERSION CHANGED FOR DEPENDENCY | " dependencyName " | " VersionCheckResults.New " | " VersionCheckResults.Old)
                 FileDelete(localPath)
                 FileAppend(rawDependency, localPath, "UTF-8-RAW")
-            }
+            ;}
         } else {
             FileAppend(rawDependency, localPath, "UTF-8-RAW")
         }
@@ -540,7 +540,7 @@ RunButtonClicked() {
         switch MsgBox(
             "Macro `"" macroObj.name "`" is missing.`nWould you like to install it?", 
             "SOUP Macros", 
-            "0x1032 0x4"
+            "0x1032 0x4 Owner" . MainGui.Hwnd
         ) {
             case "Yes":
                 newFile := RegExReplace(GetDependency(macroObj.path), 'Version\s*:=\s*"(.*?)"', 'Version := "' . macroObj.version . '"',,1)
@@ -549,7 +549,7 @@ RunButtonClicked() {
                 macroObj.local_path := newPath
 
                 FileAppend(newFile, newPath, "UTF-8-RAW")
-                MsgBox("Installed " macroObj.name)
+                MsgBox("Installed " macroObj.name,,"T10 Owner" . MainGui.Hwnd)
             case "No":
                 return
         }
@@ -559,16 +559,16 @@ RunButtonClicked() {
             switch MsgBox(
                 "Macro `"" macroObj.name "`" was updated `nWould you like to update?",
                 "SOUP Macros", 
-                "0x1032 0x4"
+                "0x1032 0x4 Owner" . MainGui.Hwnd
             ) {
                 case "Yes":
                     FileDelete(macroObj.local_path)
                     newFile := RegExReplace(GetDependency(macroObj.path), 'Version\s*:=\s*"(.*?)"', 'Version := "' . macroObj.version . '"',,1)
                     macroObj.raw_file := newFile
                     FileAppend(newFile, macroObj.local_path, "UTF-8-RAW")
-                    MsgBox("Updated macro")
+                    MsgBox("Updated macro",,"T10 +Owner" . MainGui.Hwnd)
                 default:
-                    MsgBox("Keeping the current version & running")
+                    MsgBox("Keeping the current version & running",,"T10 Owner" . MainGui.Hwnd)
             }
         }
     }
@@ -937,7 +937,7 @@ GetMacroInformation() {
         newArgMap.raw_file := obj.raw_file
         newArgMap.is_custom := true
 
-        CreateMacroObject(newArgMap)
+        ;CreateMacroObject(newArgMap)
     }
 }
 

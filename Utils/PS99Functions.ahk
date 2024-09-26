@@ -1,6 +1,6 @@
 ﻿#Requires AutoHotkey v2.0
 
-global Version := "1.0.3"
+global Version := "1.0.4"
 global Dependencies := ["Utils\Functions.ahk", "Utils\UWBOCRLib.ahk", "Storage\PS99UI.ahk"]
 
 #Include "%A_MyDocuments%\SOUP_Macros\Utils\Functions.ahk"
@@ -146,10 +146,10 @@ ExitMenus() {
         MenuOpen := UIPixelSearch("Menu_Close", "Exit")[1]
         NotificationOpen := UIPixelSearch("Notification_Close", "Exit")[1]
 
-        if (MenuOpen == 1) {
+        if MenuOpen {
             UIClick("Menu_Close")
         }
-        if (NotificationOpen == 1) {
+        if NotificationOpen {
             UIClick("Notification_Close")
         }
 
