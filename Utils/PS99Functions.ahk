@@ -292,7 +292,7 @@ SetCameraSensitivity() {
         }
 
         MouseMove(760, 300, 0)
-        SendEvent("{Click 760, 300}")
+        MouseMover(3,0)
         Success := false
 
         Loop {
@@ -345,7 +345,7 @@ SetCameraSensitivity() {
     }
 }
 
-DllCaller(X := 0, Y := 0) {
+MouseMover(X := 0, Y := 0) {
     DllCall("mouse_event", "UInt", 0x0001, "Int", X, "Int", Y, "UInt", 0, "UPtr", 0)
 }
 
@@ -368,7 +368,7 @@ TurnCameraX(degrees) {
         if isnegative {
             realStep *= -1
         }
-        DllCaller(realStep, 0)  ; Move by 10 units
+        MouseMover(realStep, 0)  ; Move by 10 units
         Sleep(10)  ; Small delay to smooth movement
     }
     
@@ -382,7 +382,7 @@ TurnCameraX(degrees) {
 
         OutputDebug("[DEBUG] MOVING BY: " realUnit)
 
-        DllCaller(realUnit, 0)  ; Move any remaining units
+        MouseMover(realUnit, 0)  ; Move any remaining units
     }
 }
 
@@ -405,7 +405,7 @@ TurnCameraY(degrees) {
         if isnegative {
             realStep *= -1
         }
-        DllCaller(0, realStep)  ; Move by 10 units
+        MouseMover(0, realStep)  ; Move by 10 units
         Sleep(10)  ; Small delay to smooth movement
     }
     
@@ -416,6 +416,6 @@ TurnCameraY(degrees) {
         if isnegative {
             realUnit *= -1
         }
-        DllCaller(0, realUnit)  ; Move any remaining units
+        MouseMover(0, realUnit)  ; Move any remaining units
     }
 }

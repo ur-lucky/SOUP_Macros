@@ -330,6 +330,9 @@ for hwnd in WinGetList("ahk_exe RobloxPlayerBeta.exe") {
 
 one_hour := 60 * 60 * 1000
 
+MsgBox("F3 to start`nF5 to pause`nF8 to exit`n`ndont touch anything once you start")
+
+
 ; Main Loop
 Loop {
     for index, window in windows {
@@ -389,8 +392,6 @@ Loop {
     }
     Sleep(10)
 }
-
-MsgBox("F3 to start`nF5 to pause`nF8 to exit`n`ndont touch anything once you start")
 
 ToggleState(state := "") {
     global windows

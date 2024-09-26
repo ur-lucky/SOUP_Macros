@@ -1,7 +1,7 @@
 #Requires AutoHotkey v2.0
 #SingleInstance Force
 
-global Version := "1.0.0"
+global Version := "1.0.1"
 global Dependencies := ["Utils\Functions.ahk"]
 
 #Include "%A_MyDocuments%\SOUP_Macros\Utils\Functions.ahk"
@@ -106,8 +106,8 @@ SolveMovement(MovementMap) {
                         SendEvent("{Click Right Down Relative}")
                         Sleep(50)
                         ;MouseMove(0, 0, 0, "R")
-                        DllCaller(1,0)
-                        DllCaller(-1,0)
+                        MouseMover(1,0)
+                        MouseMover(-1,0)
                         TurnCameraX(marker.Degrees)
                         SendEvent("{Click Right Up}")
                         CoordMode "Mouse", "Client"
@@ -119,8 +119,8 @@ SolveMovement(MovementMap) {
                         SendEvent("{Click Right Down Relative}")
                         Sleep(50)
                         ;MouseMove(0, 0, 0, "R")
-                        DllCaller(0,1)
-                        DllCaller(0,-1)
+                        MouseMover(0,1)
+                        MouseMover(0,-1)
                         TurnCameraY(marker.Degrees)
                         SendEvent("{Click Right Up}")
                         CoordMode "Mouse", "Client"
