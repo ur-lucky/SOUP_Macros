@@ -270,7 +270,7 @@ _RunAutoCatchMacro() {
 
             ; click on random position inside polygon
             RandomMousePosition := RandomPositionInShape(ClickCoordinatesPolygon)
-            SendEvent("{Click " RandomMousePosition.X " " RandomMousePosition.Y " 20}")
+            SendEvent("{Click " RandomMousePosition.X " " RandomMousePosition.Y " 3}")
 
             if UIPixelSearchLoop("Notification_Close", "Exit", 0)[1] {
                 buttonToClick := CheckNotification()
