@@ -5,7 +5,7 @@ global MacroName := "Pet Cube"
 global MacroDescription := "Automatically break boss chest and capture pets"
 global MacroStatus := "Stable"
 
-global Version := "1.0.0f"
+global Version := "1.0.1"
 global Dependencies := [
     "Utils\UWBOCRLib.ahk","Utils\Functions.ahk","Utils\PS99Functions.ahk","Storage\PS99UI.ahk",
     "Modules\Autofarm.ahk","Modules\MoveHumanoid.ahk","Modules\Reconnect.ahk","Modules\TeleportToWorld.ahk","Modules\TeleportToZone.ahk", "Modules\ValidateClan.ahk"
@@ -223,15 +223,16 @@ CustomPixelSearchAndHandlePets(window) {
                     if buttonToClick {
                         window.LastCatchPrompt := A_TickCount
                         if buttonToClick = "Notification_Yes" {
-                            UIClick(buttonToClick)
+                            UIClick(buttonToClick, 2)
                             window.LastPetCaught := A_TickCount
+                            window.CatchTimestamps.Push(A_TickCount)
                             return true
                         } else if buttonToClick = "Notification_Ok" {
-                            UIClick(buttonToClick)
+                            UIClick(buttonToClick, 2)
                             window.OutOfCubesTick := A_TickCount
                             return true
                         } else {
-                            UIClick(buttonToClick)
+                            UIClick(buttonToClick, 2)
                             return true
                         }
                     }
@@ -306,6 +307,19 @@ mountGuiToWindow(hwnd, guis) {
     SetTimer(UpdateGuiPositions, 50)
 }
 
+CleanOldTimestamps(window) {
+    currentTime := A_TickCount
+    newTimestamps := []
+
+    for timestamp in window.CatchTimestamps {
+        if (currentTime - timestamp <= 120000) {  ; Keep timestamps within 120 seconds
+            newTimestamps.Push(timestamp)
+        }
+    }
+    
+    return newTimestamps
+}
+
 ; Initialize windows and mount GUIs
 global initialized := false
 for hwnd in WinGetList("ahk_exe RobloxPlayerBeta.exe") {
@@ -327,6 +341,8 @@ for hwnd in WinGetList("ahk_exe RobloxPlayerBeta.exe") {
         LastCatchPrompt: A_TickCount,
         LastPetCaught: A_TickCount,
         CurrentSessionStartTick: A_TickCount,
+        LastTimestampClean: A_TickCount,
+        CatchTimestamps: [],
         SensitivitySet: false,
         OutOfCubesTick: 0,
         IsRunning: false,
@@ -353,6 +369,7 @@ Loop {
             WinActivate("ahk_id" window.Hwnd)
             WinWaitActive("ahk_id" window.Hwnd)
 
+
             if !window.SensitivitySet {
                 SetCameraSensitivity()
                 window.SensitivitySet := true
@@ -374,17 +391,13 @@ Loop {
                 continue
             }
             
-            if (A_TickCount - window.LastCatchPrompt >= 120000 && A_TickCount - window.OutOfCubesTick >=  120000) {
+            if (A_TickCount - window.LastCatchPrompt >= 60000 && A_TickCount - window.OutOfCubesTick >=  120000) {
                 window.IsPositioned := false
                 continue
             }
 
-            if (A_TickCount - window.LastPetCaught <= 2000) {
-                continue
-            }
-
-            if (A_TickCount - window.OutOfCubesTick <= 60000) {
-                continue
+            if (A_TickCount - window.LastTimestampClean >= 1000) {
+                window.CatchTimestamps := CleanOldTimestamps(window)
             }
 
             ; Check for boss chest every 1000 ms
@@ -401,6 +414,24 @@ Loop {
                     SendEvent("{R Down}{R Up}")
                 } 
                 window.LastChestCheckTick := A_TickCount
+            }
+
+            if (A_TickCount - window.LastPetCaught <= 2000) {
+                continue
+            }
+
+            if (A_TickCount - window.OutOfCubesTick <= 60000) {
+                Sleep(50)
+                SendEvent("{LControl Down} {LControl Up}")
+                Sleep(50)
+                continue
+            }
+
+            if (A_TickCount - window.CurrentSessionStartTick >= 120000 && A_TickCount - window.OutOfCubesTick >= 180000) {
+                averageCatches := window.CatchTimestamps.Length
+                if averageCatches <= 16 {
+                    window.IsPositioned := false
+                }
             }
 
 
@@ -423,6 +454,8 @@ ToggleState(state := "") {
             state := !window.IsRunning
         }
         window.IsRunning := state
+        window.CurrentSessionStartTick := A_TickCount
+        window.LastCatchPrompt := A_TickCount
     }
 }
 
