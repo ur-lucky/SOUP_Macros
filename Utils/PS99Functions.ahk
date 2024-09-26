@@ -1,6 +1,6 @@
 ﻿#Requires AutoHotkey v2.0
 
-global Version := "1.0.2"
+global Version := "1.0.3"
 global Dependencies := ["Utils\Functions.ahk", "Utils\UWBOCRLib.ahk", "Storage\PS99UI.ahk"]
 
 #Include "%A_MyDocuments%\SOUP_Macros\Utils\Functions.ahk"
@@ -284,7 +284,8 @@ SetCameraSensitivity() {
 
             if RegExMatch(ocrResult.Text, "Settings|Setting|etting|ing|ett") > 0 {
 
-                SendEvent("{Click 270 78}")
+                SendEvent("{Click 270 78 3}")
+                Sleep(100)
                 OutputDebug("[DEBUG] FOUND SETTINGS")
                 break
             }

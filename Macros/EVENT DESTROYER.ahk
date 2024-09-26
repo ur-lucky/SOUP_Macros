@@ -319,6 +319,7 @@ for hwnd in WinGetList("ahk_exe RobloxPlayerBeta.exe") {
         LastCatchPrompt: A_TickCount,
         LastPetCaught: A_TickCount,
         CurrentSessionStartTick: A_TickCount,
+        SensitivitySet: false,
         OutOfCubesTick: 0,
         IsRunning: false,
         IsPositioned: false,
@@ -338,6 +339,13 @@ Loop {
         }
 
         if window.IsRunning {
+            WinActivate("ahk_id" window.Hwnd)
+            WinWaitActive("ahk_id" window.Hwnd)
+
+            if !window.SensitivitySet {
+                SetCameraSensitivity()
+                window.SensitivitySet := true
+            }
     
             if !window.IsPositioned {
                 ResetCharacter()
@@ -345,8 +353,7 @@ Loop {
                 window.CurrentSessionStartTick := A_TickCount
             }
             ; Activate the window
-            WinActivate("ahk_id" window.Hwnd)
-            WinWaitActive("ahk_id" window.Hwnd)
+
 
             if (A_TickCount - window.CurrentSessionStartTick > (one_hour * 2)) {
                 ; escape loop to "rejoin"
@@ -389,7 +396,6 @@ ToggleState(state := "") {
     global windows
     global initialized
     if !initialized {
-        SetCameraSensitivity()
         initialized := true
     }
 
