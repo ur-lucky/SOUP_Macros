@@ -200,9 +200,11 @@ CustomPixelSearchAndHandlePets(window) {
 
     ; Loop through each of the 3 Y sections
     Loop 3 {
-        y1 := ClickCoordinatesPolygon[1].Y + (splitY * (A_Index - 1))  ; Start Y of the current section
-        y2 := y1 + splitY  ; End Y of the current section
+        y1 := ClickCoordinatesPolygon[3].Y - (splitY * (A_Index - 1))  ; Start Y of the current section
+        y2 := y1 - splitY  ; End Y of the current section
 
+        ;DrawPolygon([{X: ClickCoordinatesPolygon[1].X, Y: y1}, {X: ClickCoordinatesPolygon[2].X, Y: y1}, {X: ClickCoordinatesPolygon[3].X, Y: y2}, {X: ClickCoordinatesPolygon[4].X, Y: y2}], 1000, "ff0000", 2, true)
+        
         ; Loop through each color in the list
         for colorData in colorsToSearch {
             foundPixel := PixelSearch(&foundX, &foundY, ClickCoordinatesPolygon[1].X, y1, ClickCoordinatesPolygon[3].X, y2, colorData.color, colorData.variation)
@@ -417,6 +419,7 @@ ToggleState(state := "") {
 
     global windows
     for window in windows {
+        window.SensitivitySet := true
         window.IsPositioned := true
         window.CurrentSessionStartTick := A_TickCount
     }
