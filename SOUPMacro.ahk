@@ -566,7 +566,7 @@ RunButtonClicked() {
                     newFile := RegExReplace(GetDependency(macroObj.path), 'Version\s*:=\s*"(.*?)"', 'Version := "' . macroObj.version . '"',,1)
                     macroObj.raw_file := newFile
                     FileAppend(newFile, macroObj.local_path, "UTF-8-RAW")
-                    MsgBox("Updated macro",,"T10 +Owner" . MainGui.Hwnd)
+                    MsgBox("Updated macro",,"T10 Owner" . MainGui.Hwnd)
                 default:
                     MsgBox("Keeping the current version & running",,"T10 Owner" . MainGui.Hwnd)
             }
