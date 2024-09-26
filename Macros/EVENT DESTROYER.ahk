@@ -5,7 +5,7 @@ global MacroName := "Pet Cube"
 global MacroDescription := "Automatically break boss chest and capture pets"
 global MacroStatus := "Stable"
 
-global Version := "1.0.0"
+global Version := "1.0.0e"
 global Dependencies := [
     "Utils\UWBOCRLib.ahk","Utils\Functions.ahk","Utils\PS99Functions.ahk","Storage\PS99UI.ahk",
     "Modules\Autofarm.ahk","Modules\MoveHumanoid.ahk","Modules\Reconnect.ahk","Modules\TeleportToWorld.ahk","Modules\TeleportToZone.ahk", "Modules\ValidateClan.ahk"
@@ -179,7 +179,8 @@ ResetCharacter() {
             continue
         }
 
-        TeleportToZone("Elemental Realm")
+        TeleportToZone("Elemental Realm", 10000)
+        Sleep(500)
         SolveMovement(MovementMap["PositionCamera"])
         SolveMovement(MovementMap["CatchingArea"])
 
