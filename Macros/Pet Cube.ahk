@@ -385,107 +385,97 @@ _RunAutoCatchMacro() {
 
 
 
-robloxInstanceHwnd := WinGetID("ahk_exe RobloxPlayerBeta.exe")
-WinActivate("ahk_id" robloxInstanceHwnd)
-WinMove(,,816, 638, "ahk_id" robloxInstanceHwnd)
-WinWaitActive("ahk_id" robloxInstanceHwnd)
+; robloxInstanceHwnd := WinGetID("ahk_exe RobloxPlayerBeta.exe")
+; WinActivate("ahk_id" robloxInstanceHwnd)
+; WinMove(,,816, 638, "ahk_id" robloxInstanceHwnd)
+; WinWaitActive("ahk_id" robloxInstanceHwnd)
 
-guis := DrawPolygon(ClickCoordinatesPolygon, 0, "ff0000", 2, true)
-mountGuiToWindow(robloxInstanceHwnd, guis)
+; guis := DrawPolygon(ClickCoordinatesPolygon, 0, "ff0000", 2, true)
+; mountGuiToWindow(robloxInstanceHwnd, guis)
 
-global one_hour := 60 * 60 * 1000
+; global one_hour := 60 * 60 * 1000
 
-Loop {
-    TeleportToWorld("Teleport_World1")
-    TeleportToWorld("Teleport_World3")
+; Loop {
+;     TeleportToWorld("Teleport_World1")
+;     TeleportToWorld("Teleport_World3")
 
-    if not ValidateClan() {
-        continue
-    }
+;     if not ValidateClan() {
+;         continue
+;     }
 
-    TeleportToZone("Elemental Realm")
-    SolveMovement(MovementMap["CatchPetsEvent"])
+;     TeleportToZone("Elemental Realm")
+;     SolveMovement(MovementMap["CatchPetsEvent"])
 
-    CurrentSessionStartTick := A_TickCount
-    LastPetCaught := A_TickCount
-    LastChestCheckTick := A_TickCount
-    OutOfCubesTick := 0
+;     CurrentSessionStartTick := A_TickCount
+;     LastPetCaught := A_TickCount
+;     LastChestCheckTick := A_TickCount
+;     OutOfCubesTick := 0
 
-    ; main loop - this can be broken if something is just not working
-    Loop {
-        ; go by order of priority
-        ; 1. Boss Chest
-        ; --Check if chest is alive
-        ; -- Attempt to use ultimate
-        ; 2. Click on random position
-        ; 3. Check for notication menu
-        ; -- search for green button
-        ; # THIS COULD BE BAD - WORKING AS OF NOW
+;     ; main loop - this can be broken if something is just not working
+;     Loop {
+;         ; go by order of priority
+;         ; 1. Boss Chest
+;         ; --Check if chest is alive
+;         ; -- Attempt to use ultimate
+;         ; 2. Click on random position
+;         ; 3. Check for notication menu
+;         ; -- search for green button
+;         ; # THIS COULD BE BAD - WORKING AS OF NOW
 
-        if IsUserDisconnected() {
-            ReconnectToRoblox()
-            UIPixelSearchLoop("HUD_Teleport_Button_Red", "HUD_Teleport_Button_Red")
-            break
-        }
+;         if IsUserDisconnected() {
+;             ReconnectToRoblox()
+;             UIPixelSearchLoop("HUD_Teleport_Button_Red", "HUD_Teleport_Button_Red")
+;             break
+;         }
 
-        ; only need to check every 5 seconds
-        if (A_TickCount - LastChestCheckTick > 1000) {
-            if (IsBossChestAlive()) {
-                ; don't need to do a pixel search or check for time
-                SendEvent("{R Down}{R Up}")
-            } 
-            LastChestCheckTick := A_TickCount
-        }
+;         ; only need to check every 5 seconds
+;         if (A_TickCount - LastChestCheckTick > 1000) {
+;             if (IsBossChestAlive()) {
+;                 ; don't need to do a pixel search or check for time
+;                 SendEvent("{R Down}{R Up}")
+;             } 
+;             LastChestCheckTick := A_TickCount
+;         }
 
-        if (A_TickCount - LastPetCaught > 300000) {
-            ; if the player doesnt catch a pet within 5 minutes, rejoin
-            ; escape loop to "rejoin"
-            break
-        }
+;         if (A_TickCount - LastPetCaught > 300000) {
+;             ; if the player doesnt catch a pet within 5 minutes, rejoin
+;             ; escape loop to "rejoin"
+;             break
+;         }
 
-        if (A_TickCount - CurrentSessionStartTick > (one_hour * 2)) {
-            ; rejoin every 2 hours to prevent lag
-            ; escape loop to "rejoin"
-            break
-        }
+;         if (A_TickCount - CurrentSessionStartTick > (one_hour * 2)) {
+;             ; rejoin every 2 hours to prevent lag
+;             ; escape loop to "rejoin"
+;             break
+;         }
 
-        ; click on random position inside polygon
+;         ; click on random position inside polygon
 
-        Loop 3 {
-            RandomMousePosition := RandomPositionInShape(ClickCoordinatesPolygon)
-            SendEvent("{Click " RandomMousePosition.X " " RandomMousePosition.Y " 2}")
-        }
+;         Loop 3 {
+;             RandomMousePosition := RandomPositionInShape(ClickCoordinatesPolygon)
+;             SendEvent("{Click " RandomMousePosition.X " " RandomMousePosition.Y " 2}")
+;         }
 
-        if UIPixelSearchLoop("Notification_Close", "Exit", 0)[1] {
-            buttonToClick := CheckNotification()
-            Debug("BUTTON TO CLICK: " buttonToClick)
-            if buttonToClick {
-                if buttonToClick = "Notification_Yes" {
-                    UIClick(buttonToClick)
-                    LastPetCaught := A_TickCount
-                } else if buttonToClick = "Notification_Ok" {
-                    UIClick(buttonToClick)
-                    OutOfCubesTick := A_TickCount
-                } else {
-                    UIClick(buttonToClick)
-                }
-            }
-        }
+;         if UIPixelSearchLoop("Notification_Close", "Exit", 0)[1] {
+;             buttonToClick := CheckNotification()
+;             Debug("BUTTON TO CLICK: " buttonToClick)
+;             if buttonToClick {
+;                 if buttonToClick = "Notification_Yes" {
+;                     UIClick(buttonToClick)
+;                     LastPetCaught := A_TickCount
+;                 } else if buttonToClick = "Notification_Ok" {
+;                     UIClick(buttonToClick)
+;                     OutOfCubesTick := A_TickCount
+;                 } else {
+;                     UIClick(buttonToClick)
+;                 }
+;             }
+;         }
 
-        ; if you havnt caught something in 5 minutes, lowkey skill issue
-        Sleep(10)
-    }
-}
-
-ToggleState(state := "") {
-    global windows
-    for window in windows {
-        if not state {
-            state := !window.IsRunning
-        }
-        window.IsRunning := state
-    }
-}
+;         ; if you havnt caught something in 5 minutes, lowkey skill issue
+;         Sleep(10)
+;     }
+; }
 
 F3::_RunAutoCatchMacro()
 
