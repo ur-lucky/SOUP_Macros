@@ -5,7 +5,7 @@ global MacroName := "Pet Cube"
 global MacroDescription := "Automatically break boss chest and capture pets"
 global MacroStatus := "Stable"
 
-global Version := "1.0.0e"
+global Version := "1.0.0f"
 global Dependencies := [
     "Utils\UWBOCRLib.ahk","Utils\Functions.ahk","Utils\PS99Functions.ahk","Storage\PS99UI.ahk",
     "Modules\Autofarm.ahk","Modules\MoveHumanoid.ahk","Modules\Reconnect.ahk","Modules\TeleportToWorld.ahk","Modules\TeleportToZone.ahk", "Modules\ValidateClan.ahk"
@@ -56,7 +56,9 @@ MovementMap["CatchingArea"] := [
     {Key: "Q"},
     {Rest: 100},
     {Key: "W", Duration: 1375},
-    {Rest: 1300},
+    {Rest: 800},
+    {Func: EnableAutofarm},
+    {Rest: 500},
     {Key: "Q"},
 
 ]
@@ -87,7 +89,7 @@ MovementMap["CatchPetsEvent"] := [
     {Key: "S", Duration: 300},
     {Rest: 1000},
     {Key: "Q"},
-    {Key: "WheelDown", Repeat: 20, Delay: 100}
+    {Key: "WheelDown", Repeat: 15, Delay: 200}
 ]
 
 
@@ -229,7 +231,6 @@ CustomPixelSearchAndHandlePets(window) {
                             UIClick(buttonToClick)
                             return true
                         }
-                        window.LastCatchPrompt := A_TickCount
                     }
                 }
             }
