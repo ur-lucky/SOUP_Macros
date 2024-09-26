@@ -47,9 +47,9 @@ global colorsToSearch := [
 ]
 
 MovementMap["PositionCamera"] := [
+    {Key: "WheelDown", Repeat: 15, Delay: 100},
     {Key:"Camera", Direction: "X", Degrees: 90},
     {Key:"Camera", Direction: "Y", Degrees: 90},
-    {Key: "WheelDown", Repeat: 15, Delay: 100},
     {Rest: 1000},
     {Key: "WheelDown", Repeat: 5, Delay: 100}
 ]
@@ -221,6 +221,7 @@ CustomPixelSearchAndHandlePets(window) {
                     buttonToClick := CheckNotification()
                     Debug("BUTTON TO CLICK: " buttonToClick)
                     if buttonToClick {
+                        window.LastCatchPrompt := A_TickCount
                         if buttonToClick = "Notification_Yes" {
                             UIClick(buttonToClick)
                             window.LastPetCaught := A_TickCount
@@ -233,7 +234,6 @@ CustomPixelSearchAndHandlePets(window) {
                             UIClick(buttonToClick)
                             return true
                         }
-                        window.LastCatchPrompt := A_TickCount
                     }
                 }
             }
