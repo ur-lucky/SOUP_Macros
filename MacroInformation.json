@@ -7,9 +7,9 @@
     "Macros": {
         "EVENT DESTROYER.ahk": {
             "name": "EVENT DESTROYER",
-            "description": "BOTH MACROS IN ONE",
+            "description": "Packed full of features",
             "status": "Stable",
-            "version": "1.0.1d"
+            "version": "1.0.2"
         },
         "Pet Cube.ahk": {
             "name": "Pet Cube",
