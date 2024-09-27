@@ -1,6 +1,6 @@
 ﻿#Requires AutoHotkey v2.0
 
-global Version := "1.0.7"
+global Version := "1.0.9"
 global Dependencies := []
 
 global PS99_UI_POSITION_MAP := Map()
@@ -22,7 +22,7 @@ PS99_UI_COLOR_MAP["Disabled"] := {Color: "0xFF1761", Variation: 5}
 
 ; Yes/No buttons
 PS99_UI_COLOR_MAP["Accept"] := {Color: "0x7DF50D", Variation: 5}
-PS99_UI_COLOR_MAP["Ignore"] := {Color: "0x7DF50D", Variation: 5}
+PS99_UI_COLOR_MAP["Deny"] := {Color: "0xFF145B", Variation: 5}
 
 PS99_UI_COLOR_MAP["Oops_Blue"] := {Color: "0x4AD8ff", Variation: 5}
 
@@ -74,6 +74,7 @@ PS99_UI_POSITION_MAP["Notification_Icon"] := {Position: {X: 405, Y: 324}, Bounds
 
 PS99_UI_POSITION_MAP["Notification_Ok"] := {Position: {X: 405, Y: 424}, Bounds: [{X: 375, Y: 392}, {X: 432, Y: 452}]}
 PS99_UI_POSITION_MAP["Notification_Yes"] := {Position: {X: 286, Y: 424}, Bounds: [{X: 195, Y: 396}, {X: 384, Y: 454}]}
+PS99_UI_POSITION_MAP["Notification_No"] := {Position: {X: 512, Y: 424}, Bounds: [{X: 423, Y: 396}, {X: 602, Y: 454}]}
 PS99_UI_POSITION_MAP["Notification_Close"] := {Position: {X: 623, Y: 111}, Bounds: [{X: 597, Y: 87}, {X: 650, Y: 135}]}
 
 ; HUD

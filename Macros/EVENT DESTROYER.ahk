@@ -28,6 +28,7 @@ CoordMode "Mouse", "Client"
 SetMouseDelay -1
 
 global isRunning := false
+global OnlyUltra := false
 global ClickCoordinatesPolygon := [{X: 190, Y: 56}, {X: 605, Y: 56}, {X: 605, Y: 200}, {X: 190, Y: 200}]
 global MovementMap := Map()
 global focusDebounce := 250  ; 250ms debounce time for window focus checks
@@ -136,6 +137,7 @@ CustomPixelSearch(color, variation) {
 }
 
 CheckNotification() {
+    global OnlyUltra
     if UIPixelSearch("Notification_Close") {
         if UIPixelSearch("Notification_Oops") {
             ; has blue bar on top
@@ -143,6 +145,9 @@ CheckNotification() {
             foundText := SearchNotificationWarningText()
             if RegExMatch(foundText, "Use|use") > 0 {
                 ; choose the left side (Pet Cube)
+                if OnlyUltra = true {
+                    return "Notification_No"
+                }
                 return "Notification_Yes"
             } else if RegExMatch(foundText, "catch|these|need") > 0 {
                 ; choose the left side (Pet Cube)
@@ -154,6 +159,9 @@ CheckNotification() {
             foundText := SearchNotificationQuestion()
             if RegExMatch(foundText, "Which|which|catch") > 0 {
                 ; choose the left side (Pet Cube)
+                if OnlyUltra = true {
+                    return "Notification_No"
+                }
                 return "Notification_Yes"
             }
         }
@@ -343,8 +351,8 @@ for hwnd in WinGetList("ahk_exe RobloxPlayerBeta.exe") {
     runningGui.Opt("+LastFound +AlwaysOnTop -Caption +ToolWindow +Parent" . hwnd)
     runningGui.BackColor := "FFFFFF"
     WinSetTransColor("FFFFFF 255", runningGui)
-    runningGui.SetFont("c0x000000 s18 w550")
-    infoText := runningGui.AddText("w550 h300 Center", "")
+    runningGui.SetFont("c0x000000 s18 w600")
+    infoText := runningGui.AddText("w600 h300 Center", "")
     
     runningGui.Show("y-5") ; . windowHeight/2 + 100)
 
@@ -382,8 +390,8 @@ Loop {
             windows.RemoveAt(index)
             continue
         }
-
-        window.GuiText.Text := (window.IsRunning ? "Running" : "Not Running") . " | Catch Attempts: " . window.CatchAttempts . " | Rejoins: " . (window.WorldRejoins > 0 ? window.WorldRejoins : "0")
+        global OnlyUltra
+        window.GuiText.Text := (window.IsRunning ? "Running" : "Not Running") . " | Used: " . window.CatchAttempts . " | Rejoins: " . (window.WorldRejoins > 0 ? window.WorldRejoins : "0") . " | Cube: " . (OnlyUltra = true ? "Ultra" : "Normal")
 
         if window.IsRunning {
             WinActivate("ahk_id" window.Hwnd)
@@ -512,8 +520,10 @@ F5:: {
     ToggleState()
 }
 
-F7::{
-    TurnCameraX(-90)
+^F2::{
+    global OnlyUltra
+    OnlyUltra := !OnlyUltra
 }
+
 
 F8::ExitApp()  ; Exit the application
