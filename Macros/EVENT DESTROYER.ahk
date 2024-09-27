@@ -237,6 +237,12 @@ CustomPixelSearchAndHandlePets(window) {
                             window.CatchTimestamps.Push(A_TickCount)
                             window.CatchAttempts += 1
                             return true
+                        } else if buttonToClick = "Notification_No" {
+                            UIClick(buttonToClick, 2)
+                            window.LastPetCaught := A_TickCount
+                            window.CatchTimestamps.Push(A_TickCount)
+                            window.CatchAttempts += 1
+                            return true
                         } else if buttonToClick = "Notification_Ok" {
                             UIClick(buttonToClick, 2)
                             window.OutOfCubesTick := A_TickCount
