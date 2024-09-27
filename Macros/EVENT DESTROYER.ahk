@@ -403,6 +403,9 @@ Loop {
                 window.LastPetCaught := A_TickCount
                 window.OutOfCubesTick := 0
                 window.WorldRejoins += 1
+                for _, owindow in windows {
+                    owindow.LastCatchPrompt := A_TickCount
+                }
             }
             ; Activate the window
 
