@@ -1,7 +1,7 @@
 #Requires AutoHotkey v2.0
 #SingleInstance Force
 
-global Version := "1.0.2"
+global Version := "1.0.3"
 global Dependencies := ["Utils\Functions.ahk"]
 
 #Include "%A_MyDocuments%\SOUP_Macros\Utils\Functions.ahk"
@@ -108,6 +108,7 @@ SolveMovement(MovementMap) {
                         ;MouseMove(0, 0, 0, "R")
                         MouseMover(1,0)
                         MouseMover(-1,0)
+                        Sleep(20)
                         TurnCameraX(marker.Degrees)
                         SendEvent("{RButton Up}")
                         CoordMode "Mouse", "Client"
@@ -121,6 +122,7 @@ SolveMovement(MovementMap) {
                         ;MouseMove(0, 0, 0, "R")
                         MouseMover(0,1)
                         MouseMover(0,-1)
+                        Sleep(20)
                         TurnCameraY(marker.Degrees)
                         SendEvent("{RButton Up}")
                         CoordMode "Mouse", "Client"

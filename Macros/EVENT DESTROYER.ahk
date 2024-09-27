@@ -57,10 +57,8 @@ MovementMap["PositionCamera"] := [
 MovementMap["CatchingArea"] := [
     {Key: "Q"},
     {Rest: 100},
-    {Key: "W", Duration: 1375},
-    {Rest: 500},
-    {Func: EnableAutofarm},
-    {Rest: 800},
+    {Key: "W", Duration: 1350},
+    {Rest: 1300},
     {Key: "Q"},
 
 ]
@@ -70,9 +68,10 @@ MovementMap["BossChest"] := [
     {Rest: 100},
     {Key: "W", Duration: 880},
     {Rest: 880},
-    {Key: "D", Duration: 1100},
-    {Rest: 1100},
+    {Key: "D", Duration: 300},
+    {Rest: 300},
     {Key: "Q"},
+    {Func: EnableAutofarm},
 ]
 
 
@@ -186,6 +185,8 @@ ResetCharacter() {
         TeleportToZone("Elemental Realm", 10000)
         Sleep(500)
         SolveMovement(MovementMap["PositionCamera"])
+        SolveMovement(MovementMap["BossChest"])
+        TeleportToZone("Elemental Realm", 10000)
         SolveMovement(MovementMap["CatchingArea"])
 
         break
@@ -506,6 +507,10 @@ F3:: {
 
 F5:: {
     ToggleState()
+}
+
+F7::{
+    TurnCameraX(-90)
 }
 
 F8::ExitApp()  ; Exit the application
