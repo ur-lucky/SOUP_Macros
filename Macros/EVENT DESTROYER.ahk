@@ -226,6 +226,7 @@ CustomPixelSearchAndHandlePets(window) {
                             UIClick(buttonToClick, 2)
                             window.LastPetCaught := A_TickCount
                             window.CatchTimestamps.Push(A_TickCount)
+                            window.CatchAttempts += 1
                             return true
                         } else if buttonToClick = "Notification_Ok" {
                             UIClick(buttonToClick, 2)
@@ -329,10 +330,22 @@ for hwnd in WinGetList("ahk_exe RobloxPlayerBeta.exe") {
     WinActivate("ahk_id" hwnd)
     WinMove(,,816, 638, "ahk_id" hwnd)
     WinWaitActive("ahk_id" hwnd)
+    WinGetPos(&windowX, &windowY, &windowWidth, &windowHeight, "ahk_id " hwnd)
 
     ; Draw and mount GUI for this window
     guis := DrawPolygon(ClickCoordinatesPolygon, 0, "ff0000", 2, true)
     mountGuiToWindow(hwnd, guis)
+
+
+
+    runningGui := Gui()
+    runningGui.Opt("+LastFound +AlwaysOnTop -Caption +ToolWindow +Parent" . hwnd)
+    runningGui.BackColor := "FFFFFF"
+    WinSetTransColor("FFFFFF 255", runningGui)
+    runningGui.SetFont("c0x000000 s18 w550")
+    infoText := runningGui.AddText("w550 h300 Center", "")
+    
+    runningGui.Show("y-5") ; . windowHeight/2 + 100)
 
     ; Add this window's data to the array, including LastFocusTime
     windows.Push({
@@ -342,12 +355,16 @@ for hwnd in WinGetList("ahk_exe RobloxPlayerBeta.exe") {
         LastPetCaught: A_TickCount,
         CurrentSessionStartTick: A_TickCount,
         LastTimestampClean: A_TickCount,
+        LastAntiAFK: A_TickCount,
+        OutOfCubesTick: 0,
+        LastFocusTime: 0,
         CatchTimestamps: [],
         SensitivitySet: false,
-        OutOfCubesTick: 0,
         IsRunning: false,
         IsPositioned: false,
-        LastFocusTime: 0  ; Initialize LastFocusTime
+        CatchAttempts: 0,
+        WorldRejoins: -1,
+        GuiText: infoText
     })
 }
 
@@ -365,6 +382,8 @@ Loop {
             continue
         }
 
+        window.GuiText.Text := (window.IsRunning ? "Running" : "Not Running") . " | Catch Attempts: " . window.CatchAttempts . " | Rejoins: " . (window.WorldRejoins > 0 ? window.WorldRejoins : "0")
+
         if window.IsRunning {
             WinActivate("ahk_id" window.Hwnd)
             WinWaitActive("ahk_id" window.Hwnd)
@@ -381,9 +400,18 @@ Loop {
                 window.CurrentSessionStartTick := A_TickCount
                 window.LastCatchPrompt := A_TickCount
                 window.LastPetCaught := A_TickCount
+                window.OutOfCubesTick := 0
+                window.WorldRejoins += 1
             }
             ; Activate the window
 
+            if (A_TickCount - window.LastAntiAFK >= 300000) {
+                Loop 5 {
+                    SendEvent("{Click 2 2}")
+                    Sleep(10)
+                }
+                window.LastAntiAFK := A_TickCount
+            }
 
             if (A_TickCount - window.CurrentSessionStartTick > (one_hour * 2)) {
                 ; escape loop to "rejoin"
@@ -420,10 +448,7 @@ Loop {
                 continue
             }
 
-            if (A_TickCount - window.OutOfCubesTick <= 60000) {
-                Sleep(50)
-                SendEvent("{LControl Down} {LControl Up}")
-                Sleep(50)
+            if (A_TickCount - window.OutOfCubesTick <= 10000) {
                 continue
             }
 

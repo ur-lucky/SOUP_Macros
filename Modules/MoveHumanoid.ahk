@@ -1,7 +1,7 @@
 #Requires AutoHotkey v2.0
 #SingleInstance Force
 
-global Version := "1.0.1"
+global Version := "1.0.2"
 global Dependencies := ["Utils\Functions.ahk"]
 
 #Include "%A_MyDocuments%\SOUP_Macros\Utils\Functions.ahk"
@@ -103,26 +103,26 @@ SolveMovement(MovementMap) {
                         WinGetPos(&somex, &somey, &width, &height, "A")
                         MouseMove(width/2, height/2, 0)
                         Sleep(10)
-                        SendEvent("{Click Right Down Relative}")
+                        SendEvent("{RButton Down}")
                         Sleep(50)
                         ;MouseMove(0, 0, 0, "R")
                         MouseMover(1,0)
                         MouseMover(-1,0)
                         TurnCameraX(marker.Degrees)
-                        SendEvent("{Click Right Up}")
+                        SendEvent("{RButton Up}")
                         CoordMode "Mouse", "Client"
                     } else if (marker.Direction = "Y") {
                         CoordMode "Mouse", "Window"
                         WinGetPos(&somex, &somey, &width, &height, "A")
                         MouseMove(width/2, height/2, 0)
                         Sleep(10)
-                        SendEvent("{Click Right Down Relative}")
+                        SendEvent("{RButton Down}")
                         Sleep(50)
                         ;MouseMove(0, 0, 0, "R")
                         MouseMover(0,1)
                         MouseMover(0,-1)
                         TurnCameraY(marker.Degrees)
-                        SendEvent("{Click Right Up}")
+                        SendEvent("{RButton Up}")
                         CoordMode "Mouse", "Client"
 
                     }
