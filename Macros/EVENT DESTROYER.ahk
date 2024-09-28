@@ -5,7 +5,7 @@ global MacroName := "Pet Cube"
 global MacroDescription := "Automatically break boss chest and capture pets"
 global MacroStatus := "Stable"
 
-global Version := "1.0.3b"
+global Version := "1.0.1"
 global Dependencies := [
     "Utils\UWBOCRLib.ahk","Utils\Functions.ahk","Utils\PS99Functions.ahk","Storage\PS99UI.ahk",
     "Modules\Autofarm.ahk","Modules\MoveHumanoid.ahk","Modules\Reconnect.ahk","Modules\TeleportToWorld.ahk","Modules\TeleportToZone.ahk", "Modules\ValidateClan.ahk"
@@ -273,7 +273,7 @@ UpdateGuiPositions() {
             }
         }
 
-        if WinActive("ahk_class AutoHotkeyGUI") || associatedWindow = false {
+        if WinActive("ahk_class AutoHotkeyGUI") {
             continue
         }
 
@@ -320,7 +320,7 @@ mountGuiToWindow(hwnd, guis) {
     }
 
     ; Start a timer to continuously track the window's position and update the GUIs
-    SetTimer(UpdateGuiPositions, 200)
+    SetTimer(UpdateGuiPositions, 50)
 }
 
 CleanOldTimestamps(window) {
@@ -351,7 +351,6 @@ for hwnd in WinGetList("ahk_exe RobloxPlayerBeta.exe") {
     guis := DrawPolygon(ClickCoordinatesPolygon, 0, "ff0000", 2, true)
     mountGuiToWindow(hwnd, guis)
 
-    mountGuiToWindow(hwnd, DrawPolygon([{X: 718, Y: 452},{X: 781, Y: 452},{X: 781, Y: 461},{X: 718, Y:461}], 0, "ff0000", 2, true))
 
 
     runningGui := Gui()
@@ -455,7 +454,6 @@ Loop {
                 ITSALIVE := IsBossChestAlive()
 
                 ;Debug("Chest: " TrueFalseToString(ITSALIVE) " | Ultimate: " TrueFalseToString(SuccessfulUltiCheck) " | Ultimate: " TrueFalseToString(SuccessfulUtliCheck2))
-                Debug("Chest: " TrueFalseToString(ITSALIVE))
 
                 if (ITSALIVE) {
                     ;DoBossChest()
@@ -499,7 +497,7 @@ ToggleState(state := "") {
             state := !window.IsRunning
         }
         window.IsRunning := state
-        ;window.CurrentSessionStartTick := A_TickCount
+        window.CurrentSessionStartTick := A_TickCount
         window.LastCatchPrompt := A_TickCount
     }
 }
@@ -515,7 +513,7 @@ ToggleState(state := "") {
     for window in windows {
         window.SensitivitySet := true
         window.IsPositioned := true
-        ;window.CurrentSessionStartTick := A_TickCount
+        window.CurrentSessionStartTick := A_TickCount
     }
     ToggleState(true)
 }
