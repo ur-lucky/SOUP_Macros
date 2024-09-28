@@ -9,19 +9,19 @@
             "name": "EVENT DESTROYER",
             "description": "Packed full of features",
             "status": "Stable",
-            "version": "1.0.3b"
+            "version": "1.0.3c"
         },
         "Pet Cube.ahk": {
             "name": "Pet Cube",
             "description": "F3 Start\nF5 Pause\nF8 Exit",
             "status": "Stable",
-            "version": "1.1.0e"
+            "version": "1.1.1"
         },
         "Auto Catcher.ahk": {
             "name": "Auto Catcher",
             "description": "Read '#other' channel in discord for information",
             "status": "Stable",
-            "version": "1.1.1"
+            "version": "1.1.1a"
         }
     }
 }

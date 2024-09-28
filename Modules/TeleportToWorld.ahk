@@ -1,7 +1,7 @@
 ﻿#Requires AutoHotkey v2.0
 #SingleInstance Force
 
-global Version := "1.0.0"
+global Version := "1.0.1"
 global Dependencies := ["Utils\Functions.ahk","Utils\PS99Functions.ahk","Storage\PS99UI.ahk"]
 
 #Include "%A_MyDocuments%\SOUP_Macros\Utils\Functions.ahk"
@@ -29,7 +29,7 @@ TeleportToWorld(WorldName := "") {
             Sleep(200)
             
             FoundTeleportButton := UIPixelSearchLoop("HUD_Teleport_Button_Red", "HUD_Teleport_Button_Red")[1]
-            DrawPolygonOnUI("HUD_Teleport_Button_Red", 500)
+            ;DrawPolygonOnUI("HUD_Teleport_Button_Red", 500)
 
             Debug("Found button: " TrueFalseToString(FoundTeleportButton))
 

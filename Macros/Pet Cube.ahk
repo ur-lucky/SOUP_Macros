@@ -89,7 +89,7 @@ RandomPositionInShape(CoordinatesArray) {
     }
 }
 
-
+/*
 BossChestBroken() {
     x1 := 170
     y1 := 356
@@ -139,7 +139,7 @@ BossChestIsActive() {
         return true
     }
     return false
-}
+}*/
 
 IsBossChestAlive() {
     isDead := PixelSearch(&outX, &outY, 155, 500, 160, 505, "0x765848", 20)

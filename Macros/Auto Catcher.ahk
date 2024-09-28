@@ -158,7 +158,7 @@ UpdateGuiPositions() {
             }
         }
 
-        if WinActive("ahk_class AutoHotkeyGUI") {
+        if WinActive("ahk_class AutoHotkeyGUI") || associatedWindow = false {
             continue
         }
 
@@ -205,7 +205,7 @@ mountGuiToWindow(hwnd, guis) {
     }
 
     ; Start a timer to continuously track the window's position and update the GUIs
-    SetTimer(UpdateGuiPositions, 50)
+    SetTimer(UpdateGuiPositions, 200)
 }
 
 ; Initialize windows and mount GUIs
