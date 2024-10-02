@@ -15,7 +15,7 @@
             "name": "Chest Breaker",
             "description": "Breaks boss chest",
             "status": "Unstable",
-            "version": "1.0.0"
+            "version": "1.0.0a"
         },
         "Pet Cube.ahk": {
             "name": "Pet Cube",
