@@ -937,7 +937,7 @@ GetMacroInformation() {
         newArgMap.raw_file := obj.raw_file
         newArgMap.is_custom := true
 
-        CreateMacroObject(newArgMap)
+        ;CreateMacroObject(newArgMap)
     }
 }
 
