@@ -488,7 +488,7 @@ MacroButtonClicked(ButtonNumber) {
     macroObj := MacroArray.Get(MacroIndex)
 
     MainGui_MacroInfo_MacroName.Text := macroObj.name
-    MainGui_MacroInfo_MacroVersion.Text := "v" macroObj.version
+    MainGui_MacroInfo_MacroVersion.Text := !macroObj.HasOwnProp("is_custom") ? "v" . macroObj.version : macroObj.version
     MainGui_MacroInfo_MacroDescription.Text := macroObj.description
     MainGui_MacroInfo_MacroStatus.Text := macroObj.status
 
@@ -937,7 +937,7 @@ GetMacroInformation() {
         newArgMap.raw_file := obj.raw_file
         newArgMap.is_custom := true
 
-        ;CreateMacroObject(newArgMap)
+        CreateMacroObject(newArgMap)
     }
 }
 

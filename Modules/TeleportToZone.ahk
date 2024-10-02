@@ -1,7 +1,7 @@
 ﻿#Requires AutoHotkey v2.0
 #SingleInstance Force
 
-global Version := "1.0.3"
+global Version := "1.0.4"
 global Dependencies := ["Utils\Functions.ahk","Utils\PS99Functions.ahk","Storage\PS99UI.ahk"]
 
 #Include "%A_MyDocuments%\SOUP_Macros\Utils\Functions.ahk"
@@ -40,10 +40,13 @@ TeleportToZone(ZoneName := "", SleepDuration := 7000) {
             UIClick("Teleport_Spawn")
         } else {
             Debug("Teleporting to " ZoneName)
-            UIClick("Search_Box")
-            Sleep(200)
+            Loop 3 {
+                UIClick("Search_Box")
+                Sleep(100)
+            }
+            Sleep(400)
             SendText(ZoneName)
-            Sleep(100)
+            Sleep(200)
             UIClick("Teleport_Middle")
             Sleep(200)
         }
