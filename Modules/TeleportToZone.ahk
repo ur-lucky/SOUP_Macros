@@ -42,7 +42,7 @@ TeleportToZone(ZoneName := "", SleepDuration := 7000) {
             Debug("Teleporting to " ZoneName)
             UIClick("Search_Box")
             Loop 3 {
-                SendEvent("{Click}")
+                MouseClick("Left")
                 Sleep(100)
             }
             Sleep(400)
