@@ -1,7 +1,7 @@
 ﻿#Requires AutoHotkey v2.0
 #SingleInstance Force
 
-global Version := "1.0.0"
+global Version := "1.0.0a"
 global Dependencies := [
     "Utils\UWBOCRLib.ahk","Utils\Functions.ahk","Utils\PS99Functions.ahk","Storage\PS99UI.ahk",
     "Modules\Autofarm.ahk","Modules\MoveHumanoid.ahk","Modules\Reconnect.ahk","Modules\TeleportToWorld.ahk","Modules\TeleportToZone.ahk"
@@ -94,7 +94,9 @@ IsBossChestAlive() {
 }
 
 CreateUI(hwnd) {
-    MainGui := Gui("+AlwaysOnTop -SysMenu +OwnDialogs +Parent" hwnd, "Chest Breaker")
+    WinGetClientPos(&windowX, &windowY, &windowWidth, &windowHeight, "ahk_id" hwnd)
+
+    MainGui := Gui("+AlwaysOnTop -SysMenu +OwnDialogs +Owner" hwnd, "Chest Breaker")
     MainGui.OnEvent("Close", (*) => ExitApp())
     
     TabArray := ["Main", "Settings", "Chest Settings"]
@@ -119,7 +121,7 @@ CreateUI(hwnd) {
     MainGui.AddCheckbox("x10 y50 vUsingCorruption Checked0", "Using Corruption")
     MainGui.AddCheckbox("x10 y70 vChestRejoin Checked0", "Fast Chest Respawn")
     
-    MainGui.Show("w300 h200 xCenter")
+    MainGui.Show("w300 h200 xCenter x" windowX - 150 + windowWidth//2 " y" windowY - 100 + windowHeight//2)
     return MainGui
 }
 
