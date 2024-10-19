@@ -1,6 +1,6 @@
 ﻿#Requires AutoHotkey v2.0
 
-global Version := "1.0.9"
+global Version := "1.0.10"
 global Dependencies := []
 
 global PS99_UI_POSITION_MAP := Map()
@@ -110,6 +110,11 @@ PS99_UI_POSITION_MAP["Teleport_Spawn"] := {Position: {X: 23, Y: 197}, Bounds: [{
 PS99_UI_POSITION_MAP["Teleport_World1"] := {Position: {X: 23, Y: 240}, Bounds: [{X: 10, Y: 229}, {X: 34, Y: 250}]}
 PS99_UI_POSITION_MAP["Teleport_World2"] := {Position: {X: 23, Y: 286}, Bounds: [{X: 10, Y: 275}, {X: 34, Y: 297}]}
 PS99_UI_POSITION_MAP["Teleport_World3"] := {Position: {X: 23, Y: 330}, Bounds: [{X: 10, Y: 320}, {X: 34, Y: 339}]}
+
+
+; TEMPORARY
+PS99_UI_POSITION_MAP["Zone1"] := {Position: {X: 135, Y: 200}, Bounds: [{X: 135, Y: 200}, {X: 135, Y: 200}]}
+PS99_UI_POSITION_MAP["Zone5"] := {Position: {X: 660, Y: 360}, Bounds: [{X: 660, Y: 360}, {X: 660, Y: 360}]}
 
 
 ; Hatch Settings Menu

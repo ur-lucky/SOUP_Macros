@@ -865,6 +865,10 @@ GetMacroInformation() {
         if mapName = "Macros" {
             for key, config in mapObj {
                 if GithubMacros.Has(key) {
+                    if config.Has("ignore") {
+                        continue
+                    }
+
                     GitubMacroInfo := GithubMacros[key]
         
                     newArgMap := {}

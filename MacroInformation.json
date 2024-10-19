@@ -5,29 +5,39 @@
     },
 
     "Macros": {
+        "Ghost War.ahk": {
+            "name": "Ghost War",
+            "description": "Automatically position character",
+            "status": "Unstable",
+            "version": "1.0.0a"
+        },
         "EVENT DESTROYER.ahk": {
             "name": "EVENT DESTROYER",
             "description": "Packed full of features",
             "status": "Stable",
-            "version": "1.0.3d"
+            "version": "1.0.3d",
+            "ignore": true
         },
         "Chest Breaker.ahk": {
             "name": "Chest Breaker",
             "description": "Breaks boss chest",
             "status": "Unstable",
-            "version": "1.0.0b"
+            "version": "1.0.0b",
+            "ignore": true
         },
         "Pet Cube.ahk": {
             "name": "Pet Cube",
             "description": "F3 Start\nF5 Pause\nF8 Exit",
             "status": "Stable",
-            "version": "1.1.1"
+            "version": "1.1.1",
+            "ignore": true
         },
         "Auto Catcher.ahk": {
             "name": "Auto Catcher",
             "description": "Read '#other' channel in discord for information",
             "status": "Stable",
-            "version": "1.1.1a"
+            "version": "1.1.1a",
+            "ignore": true
         }
     }
 }
