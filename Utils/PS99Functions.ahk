@@ -1,6 +1,6 @@
 ﻿#Requires AutoHotkey v2.0
 
-global Version := "1.0.4"
+global Version := "1.0.5"
 global Dependencies := ["Utils\Functions.ahk", "Utils\UWBOCRLib.ahk", "Storage\PS99UI.ahk"]
 
 #Include "%A_MyDocuments%\SOUP_Macros\Utils\Functions.ahk"
@@ -161,7 +161,7 @@ ExitMenus() {
 }
 
 HasMenuOpen(MenuName := "") {
-    Bounds1 := RelativeXYToAbsolute(70,84)
+    Bounds1 := RelativeXYToAbsolute(70,80)
     Bounds2 := RelativeXYToAbsolute(360,130)
 
     width := Bounds2.X - Bounds1.X
@@ -177,7 +177,7 @@ HasMenuOpen(MenuName := "") {
 
 HasNotificationOpen(MenuName := "") {
     x1 := 195
-    y1 := 84
+    y1 := 80
     x2 := 472
     y2 := 129
 

@@ -38,8 +38,8 @@ global windows := []  ; Array to hold data for each window
 MovementMap["SpawnToEvent"] := [
     {Key: "Q"},
     {Rest: 100},
-    {Key: "A", Duration: 450},
-    {Rest: 500},
+    {Key: "A", Duration: 150},
+    {Rest: 200},
     {Key: "S", Duration: 2000},
     {Rest: 2100},
     {Key: "Q"},
