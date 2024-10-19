@@ -5,7 +5,7 @@ global MacroName := "Ghost Clan War"
 global MacroDescription := "Automatically position character"
 global MacroStatus := "Unstable"
 
-global Version := "1.0.0a"
+global Version := "1.0.0b"
 global Dependencies := [
     "Utils\UWBOCRLib.ahk","Utils\Functions.ahk","Utils\PS99Functions.ahk","Storage\PS99UI.ahk",
     "Modules\Autofarm.ahk","Modules\MoveHumanoid.ahk","Modules\Reconnect.ahk","Modules\TeleportToWorld.ahk","Modules\TeleportToZone.ahk", "Modules\ValidateClan.ahk"
@@ -106,7 +106,7 @@ _IsInEvent() {
         Sleep(200)
         UIClick("HUD_Teleport_Button")
         Sleep(400)
-        if !HasMenuOpen("Teleport") {
+        if !HasMenuOpen("port") {
             Debug("NOT IN MENU?")
             continue
         } else {
