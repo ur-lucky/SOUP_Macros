@@ -20,7 +20,7 @@ global FOLDER_TREE := {
     }
 }
 
-global Version := "1.0.1c"
+global Version := "1.0.1d"
 ;global Menu_Version := major_version "." minor_version "." patch_version (label != "" ? "-" label : "")
 
 global GITHUB_API_URL := "https://api.github.com/repos/ur-lucky/SOUP_Macros/contents/"
@@ -927,7 +927,7 @@ GetMacroInformation() {
     for index, obj in LocalMacros {
         newArgMap := {}
                     
-        OutputDebug("[DEBUG] Found local file " LocalMacro.name)
+        ;OutputDebug("[DEBUG] Found local file " LocalMacro.name)
 
         newArgMap.name := obj.name
         newArgMap.description := "CUSTOM MACRO"
