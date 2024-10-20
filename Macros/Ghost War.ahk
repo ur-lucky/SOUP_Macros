@@ -313,8 +313,7 @@ Loop {
             WinWaitActive("ahk_id" window.Hwnd)
     
             if !window.IsPositioned {
-                ;ResetCharacter()
-                UseItem("Hasty Flag", 40, 50)
+                ResetCharacter()
                 window.IsPositioned := true
                 window.CurrentSessionStartTick := A_TickCount
                 window.LastCatchPrompt := A_TickCount
