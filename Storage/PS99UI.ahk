@@ -1,6 +1,6 @@
 ﻿#Requires AutoHotkey v2.0
 
-global Version := "1.0.10"
+global Version := "1.0.11"
 global Dependencies := []
 
 global PS99_UI_POSITION_MAP := Map()
@@ -49,6 +49,7 @@ PS99_UI_COLOR_MAP["Teleport_World3"] := {Color: "0x02DAEA", Variation: 5}
 PS99_UI_COLOR_MAP["Ultiamte_Red"] := {Color: "0xFF1C1C", Variation: 1}
 PS99_UI_COLOR_MAP["Ultiamte_Blue"] := {Color: "0x70EDFC", Variation: 1}
 
+PS99_UI_COLOR_MAP["Items_Button"] := {Color: "0xB94519", Variation: 1}
 
 
 
@@ -102,6 +103,10 @@ PS99_UI_POSITION_MAP["Clan_Button"] := {Position: {X: 488, Y: 517}, Bounds: [{X:
 PS99_UI_POSITION_MAP["Clan_Side_Buttons"] := {Position: {X: 150, Y: 172}, Bounds: [{X: 54, Y: 146}, {X: 228, Y: 365}]}
 PS99_UI_POSITION_MAP["Clan_Name_Label"] := {Position: {X: 400, Y: 172}, Bounds: [{X: 388, Y: 171}, {X: 533, Y: 233}]}
 
+; Inventory Menu
+
+PS99_UI_POSITION_MAP["Items_Button"] := {Position: {X: 24, Y: 205}, Bounds: [{X: 11, Y: 192}, {X: 29, Y: 215}]}
+PS99_UI_POSITION_MAP["First_Item"] := {Position: {X: 108, Y: 223}, Bounds: [{X: 70, Y: 192}, {X: 112, Y: 236}]}
 
 
 ; Teleport Menu

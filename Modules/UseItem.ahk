@@ -1,28 +1,33 @@
 ﻿#Requires AutoHotkey v2.0
 #SingleInstance Force
 
-/*
-#Include "%A_MyDocuments%\SOUP_Macros\Utils\PS99_UI_Positions.ahk"
-#Include "%A_MyDocuments%\SOUP_Macros\Utils\Functions.ahk"
+global Version := "1.0.0"
+global Dependencies := ["Utils\PS99Functions.ahk","Storage\PS99UI.ahk"]
+
+#Include "%A_MyDocuments%\SOUP_Macros\Utils\PS99Functions.ahk"
+#Include "%A_MyDocuments%\SOUP_Macros\Storage\PS99UI.ahk"
 
 CoordMode "Pixel", "Client"
 CoordMode "Mouse", "Client"
 
 HasInventoryOpen() {
-    return UISearch("Items_Button")
+    local foundItems := UIPixelSearch("Items_Button", "Items_Button")[1]
+    local foundClanButton := UIPixelSearch("Clan_Button", "Clan_Button_Blue")[1]
+    local foundInventoryWhite := PixelSearch(&ux, &uy, 3, 183, 6, 186, "0xFFFFFF", 1)
+    return foundItems && foundClanButton && foundInventoryWhite
 }
 
 OpenItems() {
     Loop {
-        if (not HasInventoryOpen()) {
-            CloseAllMenus()
+        if !HasInventoryOpen() {
+            ExitMenus()
             SendEvent "{F Down}{F Up}"
 
-            if (not UISearchLoop("Items_Button")[1]) {
+            if (not UIPixelSearchLoop("Items_Button")[1]) {
                 continue
             }
 
-            ClickUI("Items_Button")
+            UIClick("Items_Button")
             break
         }
         break
@@ -32,11 +37,14 @@ OpenItems() {
 UseItem(ItemName := "", Amount := 1, ItemUseDelay := 70) {
     AmountRemaining := Amount
     Loop {
-        OutputDebug("Opening inventory")
+        Debug("Opening inventory")
         OpenItems()
-        ClickUI("Search_Button")
-        OutputDebug("Searching for item")
+        Sleep(400)
+        UIClick("Items_Button")
         Sleep(300)
+        UIClick("Search_Box")
+        Debug("Searching for item")
+        Sleep(200)
         SendText(ItemName)
         Sleep(100)
         StartTick := A_TickCount
@@ -44,9 +52,9 @@ UseItem(ItemName := "", Amount := 1, ItemUseDelay := 70) {
             if (AmountRemaining <= 0 || A_TickCount - StartTick > 500) {
                 break
             }
-            ClickUI("First_Item")
+            UIClick("First_Item")
             AmountRemaining -= 1
-            OutputDebug("Used item!" AmountRemaining "left!")
+            Debug("Used item!" AmountRemaining "left!")
             Sleep(ItemUseDelay)
         }
 
@@ -54,4 +62,4 @@ UseItem(ItemName := "", Amount := 1, ItemUseDelay := 70) {
             break
         }
     }
-}*/
+}

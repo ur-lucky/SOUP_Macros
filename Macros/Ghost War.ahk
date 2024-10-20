@@ -5,10 +5,10 @@ global MacroName := "Ghost Clan War"
 global MacroDescription := "Automatically position character"
 global MacroStatus := "Unstable"
 
-global Version := "1.0.0b"
+global Version := "1.0.0"
 global Dependencies := [
     "Utils\UWBOCRLib.ahk","Utils\Functions.ahk","Utils\PS99Functions.ahk","Storage\PS99UI.ahk",
-    "Modules\Autofarm.ahk","Modules\MoveHumanoid.ahk","Modules\Reconnect.ahk","Modules\TeleportToWorld.ahk","Modules\TeleportToZone.ahk", "Modules\ValidateClan.ahk"
+    "Modules\UseItem.ahk", "Modules\Autofarm.ahk","Modules\MoveHumanoid.ahk","Modules\Reconnect.ahk","Modules\TeleportToWorld.ahk","Modules\TeleportToZone.ahk", "Modules\ValidateClan.ahk"
 ]
 
 #Include "%A_MyDocuments%\SOUP_Macros\Utils\UWBOCRLib.ahk"
@@ -21,6 +21,7 @@ global Dependencies := [
 #Include "%A_MyDocuments%\SOUP_Macros\Modules\Reconnect.ahk"
 #Include "%A_MyDocuments%\SOUP_Macros\Modules\TeleportToWorld.ahk"
 #Include "%A_MyDocuments%\SOUP_Macros\Modules\TeleportToZone.ahk"
+#Include "%A_MyDocuments%\SOUP_Macros\Modules\UseItem.ahk"
 #Include "%A_MyDocuments%\SOUP_Macros\Modules\ValidateClan.ahk"
 
 CoordMode "Pixel", "Client"
@@ -38,8 +39,8 @@ global windows := []  ; Array to hold data for each window
 MovementMap["SpawnToEvent"] := [
     {Key: "Q"},
     {Rest: 100},
-    {Key: "A", Duration: 150},
-    {Rest: 200},
+    {Key: "A", Duration: 500},
+    {Rest: 600},
     {Key: "S", Duration: 2000},
     {Rest: 2100},
     {Key: "Q"},
@@ -106,7 +107,7 @@ _IsInEvent() {
         Sleep(200)
         UIClick("HUD_Teleport_Button")
         Sleep(400)
-        if !HasMenuOpen("port") {
+        if !PixelSearch(&outX, &outY, 63, 104, 70, 112, 0xDB113F, 25) {
             Debug("NOT IN MENU?")
             continue
         } else {
@@ -116,19 +117,21 @@ _IsInEvent() {
             break
         }
     }
+    Debug("IS IN EVENT MENU: " isInEvent)
+
     return isInEvent
 }
 
 ResetCharacter() {
     Loop {
         if _IsInEvent() {
-            UIClick("Zone1", 3)
+            UIClick("Zone1", 6)
             Sleep(300)
             if (_FindOops()) {
                 ExitMenus()
                 Sleep(300)
                 _IsInEvent()
-                UIClick("Zone5", 3)
+                UIClick("Zone5", 6)
                 Sleep(4500)
                 continue
             } else {
@@ -145,6 +148,9 @@ ResetCharacter() {
             continue
         }
 
+        TeleportToZone("Prison Tower")
+        TeleportToZone("_Spawn")
+
         SolveMovement(MovementMap["SpawnToEvent"])
 
         if !UIPixelSearchLoop("HUD_Teleport_Button_Red", "HUD_Teleport_Button_Red", 20000)[1] {
@@ -155,6 +161,8 @@ ResetCharacter() {
             UIClick("Zone5", 3)
             Sleep(4500)
             SolveMovement(MovementMap["FirstArea"])
+            Sleep(300)
+            UseItem("Hasty Flag", 40, 50)
             Sleep(300)
             SolveMovement(MovementMap["SecondArea"])
         }
@@ -305,7 +313,8 @@ Loop {
             WinWaitActive("ahk_id" window.Hwnd)
     
             if !window.IsPositioned {
-                ResetCharacter()
+                ;ResetCharacter()
+                UseItem("Hasty Flag", 40, 50)
                 window.IsPositioned := true
                 window.CurrentSessionStartTick := A_TickCount
                 window.LastCatchPrompt := A_TickCount
@@ -324,6 +333,11 @@ Loop {
                     Sleep(10)
                 }
                 window.LastAntiAFK := A_TickCount
+            }
+
+            if (A_TickCount - window.LastChestCheckTick > 1000) {
+                SendEvent("{R Down}{R Up}")
+                window.LastChestCheckTick := A_TickCount
             }
 
             if (A_TickCount - window.CurrentSessionStartTick > (one_hour * 2)) {
